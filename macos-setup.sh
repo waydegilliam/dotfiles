@@ -31,10 +31,7 @@ curl -fsSL https://bun.sh/install | bash
 # ----- Setup Fish Shell ---------------------------------------------------------------
 
 # Install Fisher (plugin manager)
-fish -c "curl -sL https://git.io/fisher | source && fisher install jorgebucaran/fisher"
-
-# Install plugins
-fish -c "fisher install jethrokuan/z PatrickF1/fzf.fish IlanCosman/tide@v5.0.1"
+fish -c "curl -sL https://raw.githubusercontent.com/jorgebucaran/fisher/main/functions/fisher.fish | source && fisher install jorgebucaran/fisher"
 
 # Remove conflicting fish files (in preparation for Stow)
 rm ~/.config/fish/config.fish ~/.config/fish/functions/fish_mode_prompt.fish
@@ -42,8 +39,8 @@ rm ~/.config/fish/config.fish ~/.config/fish/functions/fish_mode_prompt.fish
 # Stow fish
 stow -d $HOME/ghq/github.com/waydegg/dotfiles-public -t $HOME fish
 
-# Enable vi mode for fish
-fish -c "fish_vi_key_bindings"
+# Install plugins
+fish -c "fisher update"
 
 # Setup completions
 _HATCH_COMPLETE=fish_source hatch > ~/.config/fish/completions/hatch.fish
