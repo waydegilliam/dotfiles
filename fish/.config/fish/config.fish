@@ -49,6 +49,12 @@ switch (uname)
 
     # vscode
     set -x PATH /Applications/Visual\ Studio\ Code.app/Contents/Resources/app/bin $PATH
+
+    # psql
+    fish_add_path /opt/homebrew/opt/postgresql@15/bin/psql
+
+    # eza
+    set -x EZA_CONFIG_DIR $HOME/.config/eza
   case Linux
     # Add nvim to $PATH
     set -x PATH /opt/nvim-linux64/bin $PATH
@@ -68,7 +74,7 @@ set -x PATH $HOME/.bun/bin $PATH
 # ===== Aliases ================================================================
 alias ls "ls -p -G"
 alias la "ls -A"
-alias ll "exa -l -g --icons"
+alias ll "eza -l -g --icons"
 alias lla "ll -a"
 alias tree "tree -l -C -a -I '.git' -I 'venv' -I '__pycache__' -I '*.egg-info' -I '*.ipynb_checkpoints' -I 'node_modules'"
 
@@ -120,7 +126,6 @@ switch (uname)
     alias speedtest "speedtest-cli"
 end
 
-alias kamal='docker run -it --rm -v "$PWD:/workdir" -v "/run/host-services/ssh-auth.sock:/run/host-services/ssh-auth.sock" -e SSH_AUTH_SOCK="/run/host-services/ssh-auth.sock" -v /var/run/docker.sock:/var/run/docker.sock ghcr.io/basecamp/kamal:latest'
 
 # ===== Keybinds ==============================================================
 # Search through command history
@@ -171,7 +176,3 @@ direnv hook fish | source
 if test -d venv
   source ./venv/bin/activate.fish
 end
-
-# # bun
-# set --export BUN_INSTALL "$HOME/.bun"
-# set --export PATH $BUN_INSTALL/bin $PATH
