@@ -13,10 +13,10 @@ fish/.config/fish/functions/*
 !fish/.config/fish/functions/activate.fish
 
 fish/.config/fish/fish_variables
+fish/.config/fish/conf.d
 
 fish/.config/fish/completions/*
 !fish/.config/fish/completions/pip.fish
-!fish/.config/fish/completions/hatch.fish
 
 
 # ipython
