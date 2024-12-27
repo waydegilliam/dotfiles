@@ -73,10 +73,6 @@ stow -d ghq/github.com/waydegilliam/dotfiles -t $HOME \
 # Enable vi mode for fish
 fish -c "fish_vi_key_bindings"
 
-# Change default shell to fish
-## TODO: Add fish path to /etc/shells
-chsh -s $(which fish)
-
 # Setup neovim venv (TODO: test that this works)
 ~/.pyenv/versions/3.10.4/bin/python -m venv ~/.config/nvim/venv
 ~/.config/nvim/venv/bin/pip install -r ~/.config/nvim/requirements.txt
