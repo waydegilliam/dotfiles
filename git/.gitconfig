@@ -1,0 +1,17 @@
+[user]
+    name = Wayde Gilliam
+    email = waydegilliam@gmail.com
+
+[init]
+    defaultBranch = master
+
+[alias]
+    root = rev-parse --show-toplevel
+
+[core]
+    pager = delta
+
+[delta]
+    side-by-side = true
+    syntax-theme = GitHub
+    navigate = true
