@@ -1,3 +1,25 @@
 .DS_Store
 .swp
 venv
+
+# Fish
+fish/.config/fish/functions/*
+!fish/.config/fish/functions/fish_mode_prompt.fish
+!fish/.config/fish/functions/ide.fish
+!fish/.config/fish/functions/kk.fish
+!fish/.config/fish/functions/kpop.fish
+!fish/.config/fish/functions/ta.fish
+!fish/.config/fish/functions/venv.fish
+!fish/.config/fish/functions/activate.fish
+
+fish/.config/fish/fish_variables
+
+fish/.config/fish/completions/*
+!fish/.config/fish/completions/pip.fish
+!fish/.config/fish/completions/hatch.fish
+
+
+# ipython
+ipython/.config/ipython/*
+!ipython/.config/ipython/ipython_config.py
+!ipython/.config/ipython/profile_default/startup/keybindings.py

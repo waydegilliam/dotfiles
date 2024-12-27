@@ -27,16 +27,6 @@ sudo npm install -g \
 curl -fsSL https://bun.sh/install | bash
 
 
-# ----- Setup git -------------------------------------------------------------
-
-git config --global user.name "Wayde Gilliam"
-git config --global user.email "waydegilliam@gmail.com"
-git config --global init.defaultBranch master
-git config --global alias.root "rev-parse --show-toplevel"
-git config --global core.pager delta
-git config --global delta.side-by-side true
-git config --global delta.syntax-theme "Solarized (light)"
-
 
 # ----- Setup Fish Shell ---------------------------------------------------------------
 
@@ -54,6 +44,9 @@ stow -d $HOME/ghq/github.com/waydegg/dotfiles-public -t $HOME fish
 
 # Enable vi mode for fish
 fish -c "fish_vi_key_bindings"
+
+# Setup completions
+_HATCH_COMPLETE=fish_source hatch > ~/.config/fish/completions/hatch.fish
 
 # ----- Setup Neovim ----------------------------------------------------------
 
