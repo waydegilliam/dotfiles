@@ -13,7 +13,7 @@ set -g tide_character_color 008700
 set -g tide_character_vi_icon_default ❯
 set -g tide_character_vi_icon_replace ❯
 set -g tide_character_vi_icon_visual ❯
-set -g tide_right_prompt_items status cmd_duration context jobs virtual_env
+set -g tide_right_prompt_items status cmd_duration context jobs python
 
 # Set IPython directory
 set -x IPYTHONDIR $HOME/.config/ipython
