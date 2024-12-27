@@ -3,17 +3,10 @@
 # ----- Install packages ---------------------------------------------------------------
 
 # Install homebrew packages
-brew install bat direnv docker docker-compose exa fd fish fnm fx fzf ghq go hatch htop \
-  httpie iredis jq lua node pandoc pipx pyenv redis ripgrep sqlfluff stow \
+brew install bat direnv docker docker-compose eza fd fish fnm fx fzf ghq go hatch htop \
+  jq lua node pandoc pipx pyenv ripgrep stow \
   stylua tmux tree universal-ctags yarn saulpw/vd/visidata git-delta wget gh groff \
   postgresql
-
-# Install Python 3.10
-pyenv install 3.10.4
-
-# Install Node v18
-fnm install v18.16.0
-fnm default v18.16.0
 
 # Install homebrew casks
 brew install --casks ngrok alt-tab
@@ -23,14 +16,6 @@ wget https://github.com/neovim/neovim/releases/download/v0.9.4/nvim-macos.tar.gz
 xattr -c ~/Downloads/nvim-macos.tar.gz
 sudo tar xzvf ~/Downloads/nvim-macos.tar.gz -C /opt
 
-# Install pip(x) packages
-pipx install black \
-  && pipx install isort \
-  && pipx install invoke \
-  && pipx install git+https://github.com/waydegg/autoflake \
-  && pipx install linode-cli --pip-args="pip install boto" \
-  && pipx install pgcli
-  
 # Install (global) npm packages
 sudo npm install -g \ 
   @taplo/cli@0.5.2 \
@@ -92,8 +77,8 @@ brew install lua-language-server rust-analyzer
 rm ~/.config/fish/config.fish ~/.config/fish/functions/fish_mode_prompt.fish
 
 # Stow everything
-stow -d ghq/github.com/waydegg/dotfiles-public -t $HOME \
-  bat direnv fish git ipython npm nvim pgcli prettier stylua tmux
+stow -d ghq/github.com/waydegilliam/dotfiles -t $HOME \
+  bat direnv fish git ipython npm nvim prettier stylua tmux
 
 # Enable vi mode for fish
 fish -c "fish_vi_key_bindings"
