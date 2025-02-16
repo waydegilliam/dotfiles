@@ -51,7 +51,7 @@ switch (uname)
     set -x PATH /Applications/Visual\ Studio\ Code.app/Contents/Resources/app/bin $PATH
 
     # psql
-    fish_add_path /opt/homebrew/opt/postgresql@15/bin/psql
+    fish_add_path /opt/homebrew/opt/postgresql@16/bin/psql
 
     # eza
     set -x EZA_CONFIG_DIR $HOME/.config/eza
