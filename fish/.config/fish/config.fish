@@ -87,6 +87,7 @@ alias gc "git commit"
 alias gcm "git commit -m"
 alias gci "git commit -m '.'"
 alias gw "git worktree"
+alias gsl "git stash list"
 
 alias t tmux
 alias ts "tmux ls"
@@ -178,3 +179,4 @@ direnv hook fish | source
 if test -d venv
   source ./venv/bin/activate.fish
 end
+
