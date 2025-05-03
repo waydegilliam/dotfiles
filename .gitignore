@@ -14,9 +14,3 @@ fish/.config/fish/conf.d
 
 fish/.config/fish/completions/*
 !fish/.config/fish/completions/pip.fish
-
-
-# ipython
-ipython/.config/ipython/*
-!ipython/.config/ipython/ipython_config.py
-!ipython/.config/ipython/profile_default/startup/keybindings.py
