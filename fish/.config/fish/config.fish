@@ -55,6 +55,10 @@ switch (uname)
 
     # eza
     set -x EZA_CONFIG_DIR $HOME/.config/eza
+
+    # karabiner cli
+    set -x PATH /Library/Application\ Support/org.pqrs/Karabiner-Elements/bin $PATH
+
   case Linux
     # Add nvim to $PATH
     set -x PATH /opt/nvim-linux64/bin $PATH
@@ -176,6 +180,7 @@ pyenv init - | source
 direnv hook fish | source
 
 # venv
+set -e VIRTUAL_ENV
 if test -d venv
   source ./venv/bin/activate.fish
 end
