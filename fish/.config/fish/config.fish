@@ -115,6 +115,8 @@ alias dvl "docker volume ls"
 alias dn "docker network"
 alias dnl "docker network ls"
 
+alias uvr "uv run"
+
 alias cat bat
 alias nvm fnm
 alias vim nvim
