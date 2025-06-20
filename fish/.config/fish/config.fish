@@ -102,7 +102,7 @@ alias p python
 alias python python3
 alias pip "python -m pip"
 alias wp "which python"
-alias ip ipython
+alias ipy ipython
 
 alias d docker
 alias dc docker-compose
