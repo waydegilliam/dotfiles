@@ -1,0 +1,4 @@
+{
+  "keyMappings": "map H previousTab\nmap L nextTab\n\nmap J goBack\nmap K goForward",
+  "settingsVersion": "2.2.1"
+}
