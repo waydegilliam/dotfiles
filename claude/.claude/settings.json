@@ -1,20 +1,22 @@
 {
-	"permissions": {
-		"allow": [
-			"Bash(find:*)",
-			"Bash(ls:*)",
-			"Bash(rg:*)",
-			"Bash(git status:*)",
-			"Bash(uv run ruff:*)",
-			"Bash(uv run pyright:*)",
-			"Bash(uv run pytest:*)",
-			"Bash(npm run lint:*)",
-			"Bash(npm run typecheck:*)",
-			"Bash(npm run format:*)",
-			"Bash(npm run test:*)"
-		]
-	},
-	"env": {
-		"DISABLE_TELEMETRY": 1
-	}
+  "env": {
+    "DISABLE_TELEMETRY": "1"
+  },
+  "permissions": {
+    "allow": [
+      "Bash(find:*)",
+      "Bash(ls:*)",
+      "Bash(rg:*)",
+      "Bash(git status:*)",
+      "Bash(uv run ruff:*)",
+      "Bash(uv run pyright:*)",
+      "Bash(uv run pytest:*)",
+      "Bash(uv run mypy:*)",
+      "Bash(npm run lint:*)",
+      "Bash(npm run typecheck:*)",
+      "Bash(npm run format:*)",
+      "Bash(npm run test:*)",
+      "WebFetch(domain:docs.anthropic.com)"
+    ]
+  }
 }
