@@ -175,15 +175,20 @@ function _pypi_claim --description "Initialize, build, and deploy a Python packa
     # Set the token as an environment variable if provided
     if test -n "$token"
         echo "Using provided PyPI token for authentication"
-        env UV_PUBLISH_TOKEN=$token uv publish >/dev/null 2>&1
+        set publish_output (env UV_PUBLISH_TOKEN=$token uv publish 2>&1)
+        set publish_status $status
     else
         echo "No token provided, using default authentication method"
-        uv publish >/dev/null 2>&1
+        set publish_output (uv publish 2>&1)
+        set publish_status $status
     end
     
-    if test $status -ne 0
+    if test $publish_status -ne 0
         echo "Error: Failed to publish package"
+        echo "Error details:"
+        echo $publish_output
         if test -z "$token"
+            echo ""
             echo "Make sure you have PyPI credentials configured or provide a token with --token"
         end
         __cleanup_temp_dir
