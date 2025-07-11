@@ -67,8 +67,8 @@ brew install lua-language-server rust-analyzer
 rm ~/.config/fish/config.fish ~/.config/fish/functions/fish_mode_prompt.fish
 
 # Stow everything
-stow -d ghq/github.com/waydegilliam/dotfiles -t $HOME \
-  bat direnv fish git ipython npm nvim prettier stylua tmux
+stow -d $HOME/ghq/github.com/waydegilliam/dotfiles -t $HOME \
+  bat direnv fish git ipython npm nvim stylua tmux
 
 # Enable vi mode for fish
 fish -c "fish_vi_key_bindings"
