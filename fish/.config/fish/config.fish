@@ -78,8 +78,8 @@ set -x PATH $HOME/.bun/bin $PATH
 # ===== Aliases ================================================================
 alias ls "ls -p -G"
 alias la "ls -A"
-alias ll "eza -l -g --icons"
-alias lla "ll -a"
+alias ll "eza --long --group --group-directories-first --icons"
+alias lla "ll --all"
 alias tree "tree -l -C -a -I '.git' -I 'venv' -I '__pycache__' -I '*.egg-info' -I '*.ipynb_checkpoints' -I 'node_modules'"
 
 alias g git
@@ -125,6 +125,7 @@ alias c clear
 alias logout exit
 alias watch-gpu "watch -n0.1 nvidia-smi"
 alias lg lazygit
+alias claude="/Users/waydegilliam/.claude/local/claude"
 
 switch (uname)
   case Darwin
