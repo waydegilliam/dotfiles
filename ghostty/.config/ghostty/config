@@ -1,3 +1,5 @@
 theme = Github-Light-Default
 shell-integration = fish
 command = /opt/homebrew/bin/fish
+font-feature = -calt, -liga, -dlig
+
