@@ -1,0 +1,15 @@
+line-length = 120
+
+[lint]
+select = [
+  "E",      # pycodestyle errors
+  "W",      # pycodestyle warnings
+  "I",      # isort
+  "F",      # pyflakes
+  "B",      # flake8-bugbear
+  "C4",     # flake8-comprehensions
+  "RUF021", # parenthesize chained operators
+  "RUF022", # sort __all__
+  "RUF023", # sort __slots__
+]
+ignore = ["E712"]
