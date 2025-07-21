@@ -1,22 +1,36 @@
 {
-  "env": {
-    "DISABLE_TELEMETRY": "1"
-  },
-  "permissions": {
-    "allow": [
-      "Bash(find:*)",
-      "Bash(ls:*)",
-      "Bash(rg:*)",
-      "Bash(git status:*)",
-      "Bash(uv run ruff:*)",
-      "Bash(uv run pyright:*)",
-      "Bash(uv run pytest:*)",
-      "Bash(uv run mypy:*)",
-      "Bash(npm run lint:*)",
-      "Bash(npm run typecheck:*)",
-      "Bash(npm run format:*)",
-      "Bash(npm run test:*)",
-      "WebFetch(domain:docs.anthropic.com)"
-    ]
-  }
+	"model": "opus",
+	"env": {
+		"DISABLE_TELEMETRY": "1"
+	},
+	"permissions": {
+		"allow": [
+			"Bash(find:*)",
+			"Bash(ls:*)",
+			"Bash(rg:*)",
+			"Bash(git status:*)",
+			"Bash(uv run ruff:*)",
+			"Bash(uv run pyright:*)",
+			"Bash(uv run pytest:*)",
+			"Bash(uv run mypy:*)",
+			"Bash(npm run lint:*)",
+			"Bash(npm run typecheck:*)",
+			"Bash(npm run format:*)",
+			"Bash(npm run test:*)",
+			"WebFetch(domain:docs.anthropic.com)"
+		]
+	},
+	"hooks": {
+		"PostToolUse": [
+			{
+				"matcher": "Edit|MultiEdit|Write",
+				"hooks": [
+					{
+						"type": "command",
+						"command": "/Users/waydegilliam/.claude/scripts/format.py"
+					}
+				]
+			}
+		]
+	}
 }
