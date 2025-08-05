@@ -85,13 +85,19 @@ alias tree "tree -l -C -a -I '.git' -I 'venv' -I '__pycache__' -I '*.egg-info' -
 alias g git
 alias gs "git status"
 alias ga "git add"
+alias gb "git branch"
+alias gbl "git branch --list"
+alias gbd "git branch --delete"
 alias gd "git diff"
 alias gds "git diff --staged"
 alias gc "git commit"
 alias gcm "git commit -m"
 alias gci "git commit -m '.'"
-alias gw "git worktree"
 alias gsl "git stash list"
+alias gw "git worktree"
+alias gwa "git worktree add"
+alias gwl "git worktree list"
+alias gwr "git worktree remove"
 
 alias t tmux
 alias ts "tmux ls"
