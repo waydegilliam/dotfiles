@@ -19,7 +19,10 @@
 			"Bash(npm run format:*)",
 			"Bash(npm run test:*)",
 			"WebFetch(domain:docs.anthropic.com)",
-			"WebFetch(domain:docs.astral.sh)"
+			"WebFetch(domain:docs.astral.sh)",
+			"WebFetch(domain:react.dev)",
+			"WebFetch(domain:docs.aws.amazon.com)",
+			"WebFetch(domain:tanstack.com)"
 		]
 	},
 	"hooks": {
