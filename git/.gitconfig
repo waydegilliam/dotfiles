@@ -6,7 +6,11 @@
     defaultBranch = master
 
 [alias]
+    # Show the root directory of the repository
     root = rev-parse --show-toplevel
+
+    # Clean up local branches that have been deleted on remote
+    branch-clean = !git fetch --prune && git branch -vv | grep ': gone]' | grep -v '*' | cut -d' ' -f3 | xargs git branch -D 2>/dev/null
 
 [core]
     pager = delta
