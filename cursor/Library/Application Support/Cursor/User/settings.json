@@ -1,0 +1,211 @@
+{
+  "editor.fontSize": 13,
+  "editor.fontFamily": "Menlo Nerd Font",
+  "editor.minimap.enabled": false,
+  "editor.guides.indentation": false,
+  "editor.guides.bracketPairs": false,
+  "editor.rulers": [120],
+  "editor.wordWrapColumn": 120,
+  "editor.lineHighlightBackground": "#1073cf2d",
+  "editor.lineHighlightBorder": "#9fced11f",
+  "editor.formatOnSave": true,
+  "editor.inlineSuggest.enabled": true,
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.inlayHints.enabled": "off",
+  "editor.cursorSurroundingLines": 8,
+  "editor.linkedEditing": true,
+  "editor.accessibilitySupport": "on",
+  "workbench.startupEditor": "none",
+  "workbench.iconTheme": "material-icon-theme",
+  "workbench.colorTheme": "GitHub Light Default",
+  "workbench.preferredDarkColorTheme": "Default Dark+",
+  "workbench.colorCustomizations": {
+    "editor.lineHighlightBackground": "#1073cf2d",
+    "editor.lineHighlightBorder": "#9fced11f"
+  },
+  "window.zoomLevel": 1,
+  "material-icon-theme.folders.theme": "classic",
+  "accessibility.signalOptions.volume": 0,
+
+  "terminal.integrated.defaultProfile.osx": "fish",
+  "terminal.integrated.commandsToSkipShell": ["workbench.action.focusActiveEditorGroup"],
+  "terminal.integrated.fontFamily": "Menlo Nerd Font",
+  "terminal.integrated.fontSize": 13,
+  "terminal.integrated.enableMultiLinePasteWarning": "never",
+
+  "search.exclude": {
+    "**/venv": true
+  },
+  "explorer.confirmDragAndDrop": false,
+  "explorer.confirmPasteNative": false,
+
+  "git.openRepositoryInParentFolders": "always",
+  "gitlens.views.branches.branches.layout": "list",
+  "githubPullRequests.pullBranch": "never",
+  "diffEditor.ignoreTrimWhitespace": false,
+  "diffEditor.wordWrap": "off",
+
+  "python.languageServer": "Default",
+  "ruff.configuration": "pyproject.toml",
+  "ruff.exclude": ["data"],
+  "javascript.format.semicolons": "remove",
+  "javascript.updateImportsOnFileMove.enabled": "never",
+  "typescript.suggest.completeFunctionCalls": true,
+  "typescript.updateImportsOnFileMove.enabled": "always",
+  "typescript.format.enable": false,
+  "prettier.semi": false,
+  "prettier.printWidth": 120,
+  "yaml.format.printWidth": 120,
+  "yaml.format.proseWrap": "always",
+  "evenBetterToml.schema.associations": {
+    "**/pyproject.toml": "https://json.schemastore.org/pyproject.json"
+  },
+  "evenBetterToml.formatter.allowedBlankLines": 2,
+  "evenBetterToml.formatter.columnWidth": 120,
+
+  "notebook.output.textLineLimit": 100,
+  "notebook.lineNumbers": "on",
+  "svelte.enable-ts-plugin": true,
+  "liveServer.settings.donotVerifyTags": true,
+  "extensions.ignoreRecommendations": true,
+
+  "debug.javascript.autoAttachFilter": "onlyWithFlag",
+  "debug.onTaskErrors": "debugAnyway",
+
+  "security.workspace.trust.untrustedFiles": "open",
+  "crashReporting.enabled": "off",
+  "redhat.telemetry.enabled": false,
+  "cursor-retrieval.canAttemptGithubLogin": false,
+
+  "remote.SSH.remotePlatform": {
+    "10.0.0.182": "linux",
+    "ubuntu-desktop-local": "linux",
+    "stockgpt-staging": "linux",
+    "stockgpt-staging-qdrant": "linux",
+    "ubuntu-desktop": "linux"
+  },
+
+  "cursor.composer.shouldAllowCustomModes": true,
+
+  "vim.foldfix": true,
+  "vim.easymotion": true,
+  "vim.highlightedyank.enable": true,
+  "vim.leader": " ",
+  "vim.hlsearch": true,
+  "vim.handleKeys": {
+    "<C-w>": false,
+    "u": false,
+    "<C-r>": false
+  },
+  "vim.useSystemClipboard": true,
+  "vim.easymotionKeys": "etovxqpdygfblzhckisuran",
+  "vim.easymotionMarkerForegroundColorOneChar": "#ff007c",
+  "vim.easymotionMarkerForegroundColorTwoCharFirst": "#00dfff",
+  "vim.easymotionMarkerForegroundColorTwoCharSecond": "#2b8db3",
+  "vim.normalModeKeyBindingsNonRecursive": [
+    {
+      "before": ["g", "c"],
+      "commands": ["editor.action.commentLine"]
+    },
+    {
+      "before": ["<leader>", "m"],
+      "commands": ["workbench.action.toggleEditorWidths"]
+    },
+    {
+      "before": ["<leader>", "d", "b"],
+      "commands": ["editor.debug.action.toggleBreakpoint"]
+    },
+    {
+      "before": ["<leader>", "d", "c"],
+      "commands": ["workbench.action.debug.continue"]
+    },
+    {
+      "before": ["<leader>", "d", "s"],
+      "commands": ["workbench.action.debug.stepOver"]
+    },
+    {
+      "before": ["<leader>", "e"],
+      "commands": ["workbench.action.focusSideBar"]
+    },
+    {
+      "before": ["f"],
+      "after": ["<leader>", "<leader>", "<leader>", "b", "d", "w"]
+    },
+    {
+      "before": ["F"],
+      "after": ["<leader>", "<leader>", "<leader>", "b", "d", "j", "k"]
+    }
+  ],
+  "vim.insertModeKeyBindingsNonRecursive": [
+    {
+      "before": ["j", "k"],
+      "after": ["<esc>", "l"]
+    }
+  ],
+
+  "files.watcherExclude": {
+    "**/__pycache__/**": true,
+    "**/.git/**": true,
+    "**/.mypy_cache/**": true,
+    "**/venv/**": true,
+    "**/.ipynb_checkpoints/**": true,
+    "**/*.egg-info/**": true
+  },
+  "files.exclude": {
+    "**/__pycache__": true,
+    "**/.git": true,
+    "**/.ipynb_checkpoints": true,
+    "**/.mypy_cache": true,
+    "**/.nitro": true,
+    "**/.output": true,
+    "**/.pytest_cache": true,
+    "**/.ruff_cache": true,
+    "**/.tanstack": true,
+    "**/.venv": true,
+    "**/*.egg-info/**": true,
+    "**/node_modules": true,
+    "**/venv": true
+  },
+
+  "[css]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.formatOnSave": true
+  },
+  "[html]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.formatOnSave": true
+  },
+  "[javascript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.formatOnSave": true
+  },
+  "[json]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.formatOnSave": true
+  },
+  "[python]": {
+    "editor.codeActionsOnSave": {
+      "source.fixAll": "explicit",
+      "source.organizeImports": "explicit"
+    }
+  },
+  "[shellscript]": {
+    "files.eol": "\n",
+    "editor.defaultColorDecorators": "never"
+  },
+  "[toml]": {
+    "editor.defaultFormatter": "tamasfe.even-better-toml"
+  },
+  "[typescript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.formatOnSave": true
+  },
+  "[typescriptreact]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.formatOnSave": true
+  },
+  "[yaml]": {
+    "editor.defaultFormatter": "redhat.vscode-yaml",
+    "editor.formatOnSave": true
+  }
+}

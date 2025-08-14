@@ -1,0 +1,316 @@
+[
+  // Font Zoom
+  {
+    "key": "cmd+shift+=",
+    "command": "editor.action.fontZoomIn"
+  },
+  {
+    "key": "cmd+shift+-",
+    "command": "editor.action.fontZoomOut"
+  },
+  // Vim toggle
+  {
+    "key": "ctrl+alt+v",
+    "command": "toggleVim",
+    "when": "editorTextFocus"
+  },
+  // --- Tmux-like "panel" navigation -----------------------------------------
+  // Maximize panel
+  {
+    "key": "ctrl+space m",
+    "command": "workbench.action.togglePanel",
+    "when": "vim.active && vim.mode == 'Normal' && editorTextFocus"
+  },
+  {
+    "key": "ctrl+space m",
+    "command": "workbench.action.toggleMaximizedPanel",
+    "when": "vim.active && vim.mode == 'Normal' && terminalFocus"
+  },
+  // Panel navigation
+  {
+    "key": "ctrl+space j",
+    "command": "workbench.action.focusPanel",
+    "when": "vim.active && vim.mode == 'Normal' && !terminalFocus"
+  },
+  {
+    "key": "ctrl+space k",
+    "command": "workbench.action.focusActiveEditorGroup",
+    "when": "vim.active && vim.mode == 'Normal' && terminalFocus"
+  },
+  // V-split terminal
+  {
+    "key": "ctrl+space v",
+    "command": "workbench.action.terminal.split",
+    "when": "terminalFocus"
+  },
+  // Create terminal
+  {
+    "key": "ctrl+space c",
+    "command": "workbench.action.terminal.new",
+    "when": "terminalFocus"
+  },
+  // Create JS Debugger terminal
+  {
+    "key": "ctrl+space d",
+    "command": "extension.js-debug.createDebuggerTerminal",
+    "when": "terminalFocus"
+  },
+  // Rename terminal
+  {
+    "key": "ctrl+space ,",
+    "command": "workbench.action.terminal.rename",
+    "when": "terminalFocus"
+  },
+  // Navigate terminal panes
+  {
+    "key": "ctrl+space l",
+    "command": "workbench.action.terminal.focusNextPane",
+    "when": "terminalFocus"
+  },
+  {
+    "key": "ctrl+space h",
+    "command": "workbench.action.terminal.focusPreviousPane",
+    "when": "terminalFocus"
+  },
+  // Navigate terminal "groups"
+  {
+    "key": "ctrl+space n",
+    "command": "workbench.action.terminal.focusNext",
+    "when": "terminalFocus"
+  },
+  {
+    "key": "ctrl+space p",
+    "command": "workbench.action.terminal.focusPrevious",
+    "when": "terminalFocus"
+  },
+  // Kill terimal
+  {
+    "key": "ctrl+space x",
+    "command": "workbench.action.terminal.kill",
+    "when": "terminalFocus"
+  },
+  // View SCM (Git stuff)
+  {
+    "key": "shift+cmd+g",
+    "command": "workbench.view.scm"
+  },
+  // View Sql Panel
+  {
+    "key": "shift+cmd+s",
+    "command": "sqltoolsViewConnectionExplorer.focus"
+  },
+  // --- Vim-like editor navigation -----------------------------------------
+  // "Buffer" navigation
+  {
+    "key": "shift+l",
+    "command": "workbench.action.nextEditorInGroup",
+    "when": "vim.active && vim.mode == 'Normal' && editorFocus"
+  },
+  {
+    "key": "shift+h",
+    "command": "workbench.action.previousEditorInGroup",
+    "when": "vim.active && vim.mode == 'Normal' && editorFocus"
+  },
+  // "Window" navigation
+  {
+    "key": "ctrl+h",
+    "command": "workbench.view.explorer",
+    "when": "vim.active && vim.mode == 'Normal' && activeEditorGroupIndex == 1"
+  },
+  {
+    "key": "ctrl+h",
+    "command": "workbench.action.focusLeftGroup",
+    "when": "vim.active && vim.mode == 'Normal' && activeEditorGroupIndex != 1"
+  },
+  {
+    "key": "ctrl+j",
+    "command": "workbench.action.focusBelowGroup",
+    "when": "vim.active && vim.mode == 'Normal'"
+  },
+  {
+    "key": "ctrl+k",
+    "command": "workbench.action.focusAboveGroup",
+    "when": "vim.active && vim.mode == 'Normal'"
+  },
+  {
+    "key": "ctrl+l",
+    "command": "workbench.action.focusRightGroup",
+    "when": "vim.active && vim.mode == 'Normal'"
+  },
+  {
+    "key": "ctrl+l",
+    "command": "workbench.action.focusFirstEditorGroup",
+    "when": "vim.active && vim.mode == 'Normal' && filesExplorerFocus && !inputFocus"
+  },
+  // "Window" splits
+  {
+    "key": "ctrl+w v",
+    "command": "workbench.action.newGroupRight",
+    "when": "vim.active && vim.mode == 'Normal' && !panelFocus"
+  },
+  {
+    "key": "ctrl+w b",
+    "command": "workbench.action.newGroupBelow",
+    "when": "vim.active && vim.mode == 'Normal' && !panelFocus"
+  },
+  // Use VSCode's undo & redo
+  // TODO: fix replacing a character w/ 'u'
+  {
+    "key": "u",
+    "command": "undo",
+    "when": "vim.active && vim.mode == 'Normal' && editorTextFocus"
+  },
+  {
+    "key": "ctrl+r",
+    "command": "redo",
+    "when": "vim.active && vim.mode == 'Normal' && editorTextFocus"
+  },
+  // --- Jupyter --------------------------------------------------------------
+  {
+    "key": "cmd+enter",
+    "command": "jupyter.runcurrentcell",
+    "when": "editorTextFocus && isWorkspaceTrusted && jupyter.hascodecells && !editorHasSelection && !notebookEditorFocused"
+  },
+  // --- Docker ---------------------------------------------------------------
+  {
+    "key": "cmd+k e",
+    "command": "-workbench.files.action.focusOpenEditorsView",
+    "when": "workbench.explorer.openEditorsView.active"
+  },
+  {
+    "key": "ctrl+`",
+    "command": "-workbench.action.terminal.toggleTerminal",
+    "when": "terminal.active"
+  },
+  {
+    "key": "cmd+s",
+    "command": "-workbench.action.files.save"
+  },
+  {
+    "key": "shift+cmd+c",
+    "command": "-workbench.action.terminal.openNativeConsole",
+    "when": "!terminalFocus"
+  },
+  {
+    "key": "shift+l",
+    "command": "-notebook.toggleLineNumbers",
+    "when": "notebookEditorFocused && !inputFocus"
+  },
+  {
+    "key": "shift+cmd+t",
+    "command": "-workbench.action.reopenClosedEditor"
+  },
+  {
+    "key": "shift+cmd+t",
+    "command": "workbench.action.quickOpenTerm"
+  },
+  {
+    "key": "cmd+backspace",
+    "command": "-deleteFile"
+  },
+  {
+    "key": "a",
+    "command": "workbench.files.action.createFileFromExplorer",
+    "when": "filesExplorerFocus && foldersViewVisible && !inputFocus"
+  },
+  {
+    "key": "alt+cmd+backspace",
+    "command": "-deleteFile"
+  },
+  {
+    "key": "d",
+    "command": "deleteFile",
+    "when": "filesExplorerFocus && foldersViewVisible && !inputFocus"
+  },
+  {
+    "key": "enter",
+    "command": "-renameFile"
+  },
+  {
+    "key": "r",
+    "command": "renameFile",
+    "when": "filesExplorerFocus && foldersViewVisible && !explorerResourceReadonly && !inputFocus"
+  },
+  {
+    "key": "cmd+x",
+    "command": "-filesExplorer.cut"
+  },
+  {
+    "key": "x",
+    "command": "filesExplorer.cut",
+    "when": "filesExplorerFocus && foldersViewVisible && !inputFocus"
+  },
+  {
+    "key": "cmd+v",
+    "command": "-filesExplorer.paste",
+    "when": "filesExplorerFocus && foldersViewVisible && !explorerResourceReadonly && !inputFocus"
+  },
+  {
+    "key": "p",
+    "command": "filesExplorer.paste",
+    "when": "filesExplorerFocus && foldersViewVisible && !explorerResourceReadonly && !inputFocus"
+  },
+  {
+    "key": "ctrl+shift+f",
+    "command": "python.selectLinter",
+    "args": "selectEnclosingFunction",
+    "when": "editorTextFocus && editorLangId == 'python'"
+  },
+  {
+    "key": "cmd+i",
+    "command": "composerMode.agent"
+  },
+  {
+    "key": "cmd+backspace",
+    "command": "composer.cancelComposerStep",
+    "when": "composerFocused || focusedView =~ /^workbench.panel.aichat.view/"
+  },
+  {
+    "key": "shift+cmd+backspace",
+    "command": "-composer.cancelComposerStep",
+    "when": "composerFocused || focusedView =~ /^workbench.panel.aichat.view/"
+  },
+  {
+    "key": "cmd+backspace",
+    "command": "editor.action.inlineDiffs.rejectAll",
+    "when": "editorTextFocus && @inlineDiffs.rejectAllEdits.isActiveEditorWithDiffs"
+  },
+  {
+    "key": "shift+cmd+backspace",
+    "command": "-editor.action.inlineDiffs.rejectAll",
+    "when": "editorTextFocus && @inlineDiffs.rejectAllEdits.isActiveEditorWithDiffs"
+  },
+  {
+    "key": "cmd+backspace",
+    "command": "editor.action.inlineDiffs.cancelEdits",
+    "when": "editorTextFocus && hasActivelyGeneratingDiff"
+  },
+  {
+    "key": "shift+cmd+backspace",
+    "command": "-editor.action.inlineDiffs.cancelEdits",
+    "when": "editorTextFocus && hasActivelyGeneratingDiff"
+  },
+  {
+    "key": "shift+enter",
+    "command": "workbench.action.terminal.sendSequence",
+    "args": {
+      "text": "\\\r\n"
+    },
+    "when": "terminalFocus"
+  },
+  {
+    "key": "ctrl+j",
+    "command": "workbench.action.focusPanel",
+    "when": "editorFocus && panelVisible"
+  },
+  {
+    "key": "ctrl+k",
+    "command": "workbench.action.focusActiveEditorGroup",
+    "when": "panelFocus && mainEditorAreaVisible"
+  },
+  {
+    "key": "ctrl+space v",
+    "command": "workbench.action.terminal.split",
+    "when": "terminalFocus"
+  }
+]
