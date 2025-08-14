@@ -1,0 +1,21 @@
+#!/bin/bash
+
+git fetch --prune
+
+gone_branches=$(git branch -vv | grep ': gone]' | grep -v '*' | awk '{print $1}')
+
+if [ -z "$gone_branches" ]; then
+    echo "No branches to clean up."
+    exit 0
+fi
+
+echo "Branches to delete:"
+echo "$gone_branches"
+echo
+read -p "Delete these branches? (y/n): " -r response
+
+if [[ "$response" =~ ^[yY]$ ]]; then
+    echo "$gone_branches" | xargs git branch -D
+else
+    echo "Cancelled."
+fi
