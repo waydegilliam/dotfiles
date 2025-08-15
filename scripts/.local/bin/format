@@ -1,0 +1,134 @@
+#!/usr/bin/env -S uv run --script
+#
+# /// script
+# requires-python = "==3.13.5"
+# dependencies = ["click"]
+# ///
+
+import subprocess
+import sys
+from pathlib import Path
+from typing import Generator, Literal, Sequence
+
+import click
+
+RUFF_EXTENSIONS = {".py"}
+PRETTIER_EXTENSIONS = {
+    ".js",
+    ".jsx",
+    ".ts",
+    ".tsx",
+    ".json",
+    ".css",
+    ".scss",
+    ".less",
+    ".html",
+    ".vue",
+    ".yaml",
+    ".yml",
+    ".md",
+    ".mdx",
+    ".svg",
+    ".toml",
+}
+
+
+def ruff_format(paths: Sequence[Path]) -> None:
+    path_strings = [str(path) for path in paths]
+
+    click.echo(click.style("ruff format", bold=True))
+    format_process = subprocess.run(["uvx", "ruff", "format", *path_strings], capture_output=True, text=True)
+    click.echo(format_process.stdout)
+    if format_process.returncode != 0:
+        sys.exit(format_process.returncode)
+
+    click.echo(click.style("ruff check --fix", bold=True))
+    check_process = subprocess.run(
+        ["uvx", "ruff", "check", "--output-format", "grouped", "--fix", *path_strings], capture_output=True, text=True
+    )
+    click.echo(check_process.stdout)
+    if check_process.returncode != 0:
+        sys.exit(check_process.returncode)
+
+
+def prettier_format(paths: Sequence[Path]) -> None:
+    path_strings = [str(path) for path in paths]
+
+    click.echo(click.style("prettier --write", bold=True))
+    prettier_process = subprocess.run(["npx", "prettier", "--write", *path_strings], capture_output=True, text=True)
+    print(prettier_process.stdout)
+    if prettier_process.returncode != 0:
+        sys.exit(prettier_process.returncode)
+
+
+def format_file(file_path: Path) -> None:
+    ext = file_path.suffix.lower()
+    if ext in RUFF_EXTENSIONS:
+        ruff_format([file_path])
+    elif ext in PRETTIER_EXTENSIONS:
+        prettier_process = subprocess.run(
+            ["npx", "prettier", "--write", file_path],
+            capture_output=True,
+            text=True,
+        )
+        print(prettier_process.stdout)
+
+    else:
+        print(f"Skipping {file_path}: unsupported extension {ext}")
+
+
+def get_formatter_type(file_path: Path) -> Literal["ruff", "prettier"] | None:
+    ext = file_path.suffix.lower()
+    if ext in RUFF_EXTENSIONS:
+        return "ruff"
+    if ext in PRETTIER_EXTENSIONS:
+        return "prettier"
+    return None
+
+
+def iter_files(*, directory_path: Path, pattern="*", recursive=True) -> Generator[Path, None, None]:
+    glob_method = directory_path.rglob if recursive else directory_path.glob
+    for item in glob_method(pattern):
+        if item.is_file():
+            yield item
+
+
+@click.command(help="Format files and directories")
+@click.argument("files", nargs=-1)
+def format(files: list[str]) -> None:
+    ruff_file_paths = set()
+    prettier_file_paths = set()
+
+    for file in files:
+        file_path = Path(file)
+
+        if file_path.is_file():
+            formatter_type = get_formatter_type(file_path)
+            if formatter_type == "ruff":
+                ruff_file_paths.add(file_path)
+            elif formatter_type == "prettier":
+                prettier_file_paths.add(file_path)
+            else:
+                print(f"Skipping {file_path}: unsupported extension {file_path.suffix.lower()}")
+
+        elif file_path.is_dir():
+            for file in iter_files(directory_path=file_path):
+                formatter_type = get_formatter_type(file)
+                if formatter_type == "ruff":
+                    ruff_file_paths.add(file)
+                elif formatter_type == "prettier":
+                    prettier_file_paths.add(file)
+                else:
+                    print(f"Skipping {file}: unsupported extension {file.suffix.lower()}")
+
+        else:
+            print(f"Skipping {file_path}: not a file or directory")
+
+    if ruff_file_paths:
+        ruff_format(ruff_file_paths)
+    if prettier_file_paths:
+        prettier_format(prettier_file_paths)
+
+
+if __name__ == "__main__":
+    format(sys.argv[1:])
