@@ -53,6 +53,7 @@
   "typescript.format.enable": false,
   "prettier.semi": false,
   "prettier.printWidth": 120,
+  "prettier.tabWidth": 4,
   "yaml.format.printWidth": 120,
   "yaml.format.proseWrap": "always",
   "evenBetterToml.schema.associations": {
@@ -198,6 +199,6 @@
     "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
   "[yaml]": {
-    "editor.defaultFormatter": "redhat.vscode-yaml"
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
   }
 }
