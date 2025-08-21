@@ -1,41 +1,50 @@
 {
-	"$schema": "https://json.schemastore.org/claude-code-settings.json",
-	"env": {
-		"CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC": "1",
-		"DISABLE_AUTOUPDATER": "0"
-	},
-	"permissions": {
-		"allow": [
-			"Bash(find:*)",
-			"Bash(ls:*)",
-			"Bash(rg:*)",
-			"Bash(git status:*)",
-			"Bash(uv run ruff:*)",
-			"Bash(uv run pyright:*)",
-			"Bash(uv run pytest:*)",
-			"Bash(uv run mypy:*)",
-			"Bash(npm run lint:*)",
-			"Bash(npm run typecheck:*)",
-			"Bash(npm run format:*)",
-			"Bash(npm run test:*)",
-			"WebFetch(domain:docs.anthropic.com)",
-			"WebFetch(domain:docs.astral.sh)",
-			"WebFetch(domain:react.dev)",
-			"WebFetch(domain:docs.aws.amazon.com)",
-			"WebFetch(domain:tanstack.com)"
-		]
-	},
-	"hooks": {
-		"PostToolUse": [
-			{
-				"matcher": "Bash",
-				"hooks": [
-					{
-						"type": "command",
-						"command": "echo \"cwd: $(pwd)\""
-					}
-				]
-			}
-		]
-	}
+    "$schema": "https://json.schemastore.org/claude-code-settings.json",
+    "env": {
+        "CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC": "1",
+        "DISABLE_AUTOUPDATER": "0",
+        "ANTHROPIC_MODEL": "claude-opus-4-1-20250805"
+    },
+    "permissions": {
+        "allow": [
+            "Bash(find:*)",
+            "Bash(git status:*)",
+            "Bash(ls:*)",
+            "Bash(npm run format:*)",
+            "Bash(npm run lint:*)",
+            "Bash(npm run test:*)",
+            "Bash(npm run typecheck:*)",
+            "Bash(rg:*)",
+            "Bash(uv run mypy:*)",
+            "Bash(uv run pyright:*)",
+            "Bash(uv run pytest:*)",
+            "Bash(uv run ruff:*)",
+            "WebFetch(domain:developers.google.com)",
+            "WebFetch(domain:docs.anthropic.com)",
+            "WebFetch(domain:docs.astral.sh)",
+            "WebFetch(domain:docs.aws.amazon.com)",
+            "WebFetch(domain:docs.pydantic.dev)",
+            "WebFetch(domain:docs.temporal.io)",
+            "WebFetch(domain:github.com)",
+            "WebFetch(domain:lucide.dev)",
+            "WebFetch(domain:openapi-ts.dev)",
+            "WebFetch(domain:platejs.org)",
+            "WebFetch(domain:python.temporal.io)",
+            "WebFetch(domain:react.dev)",
+            "WebFetch(domain:tanstack.com)"
+        ]
+    },
+    "hooks": {
+        "PostToolUse": [
+            {
+                "matcher": "Bash",
+                "hooks": [
+                    {
+                        "type": "command",
+                        "command": "echo \"cwd: $(pwd)\""
+                    }
+                ]
+            }
+        ]
+    }
 }
