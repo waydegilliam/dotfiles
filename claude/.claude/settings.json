@@ -33,6 +33,7 @@
             "WebFetch(domain:docs.astral.sh)",
             "WebFetch(domain:docs.aws.amazon.com)",
             "WebFetch(domain:docs.pydantic.dev)",
+            "WebFetch(domain:docs.sqlalchemy.org)",
             "WebFetch(domain:docs.temporal.io)",
             "WebFetch(domain:github.com)",
             "WebFetch(domain:lucide.dev)",
