@@ -9,8 +9,10 @@ fish/.config/fish/functions/tide*
 fish/.config/fish/functions/fisher.fish
 fish/.config/fish/functions/fzf_configure_bindings.fish
 fish/.config/fish/fish_variables
-fish/.config/fish/conf.d
 *.fish.backup
 
 fish/.config/fish/completions/*
 !fish/.config/fish/completions/pip.fish
+
+fish/.config/fish/conf.d/*
+!fish/.config/fish/conf.d/fnm.fish
