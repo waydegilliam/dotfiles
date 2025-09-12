@@ -1,0 +1,97 @@
+#!/usr/bin/env -S uv run --script
+#
+# /// script
+# requires-python = "==3.13.5"
+# dependencies = ["click==8.2.1", "rich==14.1.0", "httpx==0.28.1"]
+# ///
+
+import codecs
+import sys
+from dataclasses import dataclass
+from datetime import datetime
+from itertools import chain
+from textwrap import dedent
+
+import click
+import httpx
+from rich.console import Console
+from rich.markdown import Markdown
+
+console = Console()
+
+
+@dataclass
+class PackageInfo:
+    name: str
+    summary: str | None
+    version: str
+    requires_python: str | None
+    author: str | None
+    author_email: str | None
+    project_url: str
+    package_url: str
+    last_release_at: datetime
+
+    def __repr__(self):
+        package_info_repr = f"""
+            [bold]Name:[/bold] {self.name}
+            [bold]Summary:[/bold] {self.summary}
+            [bold]Version:[/bold] {self.version}
+            [bold]Requires Python:[/bold] {self.requires_python}
+            [bold]Author:[/bold] {self.author}
+            [bold]Author Email:[/bold] {self.author_email}
+            [bold]Project URL:[/bold] {self.project_url}
+            [bold]Package URL:[/bold] {self.package_url}
+            [bold]Last Release At:[/bold] {self.last_release_at}
+        """
+        package_info_repr = dedent(package_info_repr).strip()
+
+        return package_info_repr
+
+
+@click.group()
+def pypi():
+    pass
+
+
+@pypi.command()
+@click.argument("package")
+@click.option("--with-description", "-d", is_flag=True)
+def check(package: str, with_description: bool):
+    response = httpx.get(f"https://pypi.org/pypi/{package}/json")
+
+    if response.status_code == 404:
+        console.print(f"[[bold][red]Not Found[/red][/bold]] Package [bold]{package}[/bold] not found on PyPI")
+        return
+    elif response.status_code != 200:
+        console.print(f"[[bold][red]Request Failed[/red][/bold]] {response.status_code} {response.text}")
+        return sys.exit(1)
+
+    response_json = response.json()
+
+    release_groups = response_json["releases"].values()
+    releases = chain.from_iterable(release_groups)
+    releases_sorted = sorted(releases, key=lambda e: datetime.fromisoformat(e["upload_time"]), reverse=True)
+
+    package_info = PackageInfo(
+        name=response_json["info"]["name"],
+        summary=response_json["info"]["summary"],
+        version=response_json["info"]["version"],
+        requires_python=response_json["info"]["requires_python"],
+        author=response_json["info"]["author"],
+        author_email=response_json["info"]["author_email"],
+        project_url=response_json["info"]["home_page"],
+        package_url=response_json["info"]["package_url"],
+        last_release_at=datetime.fromisoformat(releases_sorted[0]["upload_time"]),
+    )
+
+    console.print(package_info.__repr__())
+
+    if with_description:
+        description = codecs.decode(response_json["info"]["description"], "unicode_escape")
+        description_markdown = Markdown(description)
+        console.print(description_markdown)
+
+
+if __name__ == "__main__":
+    pypi(sys.argv[1:])
