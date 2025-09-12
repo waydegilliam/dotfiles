@@ -2,7 +2,7 @@
 #
 # /// script
 # requires-python = "==3.13.5"
-# dependencies = ["click"]
+# dependencies = ["click==8.2.1"]
 # ///
 
 import subprocess
