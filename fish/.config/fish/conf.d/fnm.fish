@@ -1,1 +1,1 @@
-fnm env --use-on-cd --shell fish | source
+status is-interactive && fnm env --use-on-cd | source
