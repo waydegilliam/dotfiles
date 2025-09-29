@@ -1,3 +1,10 @@
+" Install vim-plug
+let data_dir = has('nvim') ? stdpath('data') . '/site' : '~/.vim'
+if empty(glob(data_dir . '/autoload/plug.vim'))
+  silent execute '!curl -fLo '.data_dir.'/autoload/plug.vim --create-dirs  https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim'
+  autocmd VimEnter * PlugInstall --sync | source $MYVIMRC
+endif
+
 " Plugins
 call plug#begin()
 
@@ -39,7 +46,10 @@ Plug 'jose-elias-alvarez/null-ls.nvim'
 Plug 'dhruvasagar/vim-zoom', {'commit': '9f281ac7766c3931cb87698602eeb33a62660ae2'}
 Plug 'christoomey/vim-tmux-navigator', {'commit': 'afb45a55b452b9238159047ce7c6e161bd4a9907'}
 Plug 'rmagatti/auto-session' 
-Plug 'junegunn/fzf' 
+
+Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
+Plug 'junegunn/fzf.vim'
+
 Plug 'numToStr/Comment.nvim', {'commit': '5f01c1a89adafc52bf34e3bf690f80d9d726715d'}
 " Plug 'folke/zen-mode.nvim'
 Plug 'ruanyl/vim-gh-line'
@@ -48,6 +58,7 @@ Plug 'evanleck/vim-svelte'
 
 Plug 'vim-scripts/AutoComplPop'
 Plug 'easymotion/vim-easymotion'
+Plug 'projekt0n/github-nvim-theme', {'commit': 'c106c9472154d6b2c74b74565616b877ae8ed31d'}
 
 call plug#end()
 
@@ -65,8 +76,6 @@ lua require("config.plugins.hop")
 lua require("config.plugins.treesitter")
 lua require("config.plugins.autopairs")
 lua require("config.plugins.null-ls")
-lua require("config.plugins.nvim-web-devicons")
-lua require("config.plugins.fzf")
 lua require("config.plugins.comment")
 " lua require("config.plugins.zen-mode")
 
@@ -102,7 +111,7 @@ set sessionoptions+=tabpages,globals
 set shell=/bin/bash\ -i
 
 " Colorscheme
-colorscheme solarized
+colorscheme github_light_default
 
 " Python venv
 let g:python3_host_prog = stdpath('config') . '/venv/bin/python'
