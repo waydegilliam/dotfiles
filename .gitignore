@@ -16,3 +16,5 @@ fish/.config/fish/completions/*
 
 fish/.config/fish/conf.d/*
 !fish/.config/fish/conf.d/fnm.fish
+
+ghostty/.config/ghostty/*.bak
