@@ -4,3 +4,4 @@ command = /opt/homebrew/bin/fish
 font-family = Menlo Nerd Font
 font-feature = -calt, -liga, -dlig
 
+keybind = shift+enter=text:\x1b\r
