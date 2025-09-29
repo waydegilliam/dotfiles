@@ -1,7 +1,7 @@
+import builtins
 import json
 import subprocess
 import sys
-import builtins
 
 
 def _copy_to_clipboard(text: str) -> None:

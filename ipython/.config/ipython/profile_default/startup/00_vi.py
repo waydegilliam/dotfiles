@@ -1,7 +1,8 @@
-from IPython import get_ipython
 from prompt_toolkit.enums import DEFAULT_BUFFER
 from prompt_toolkit.filters import HasFocus, ViInsertMode
 from prompt_toolkit.key_binding.vi_state import InputMode
+
+from IPython import get_ipython
 
 ip = get_ipython()
 
