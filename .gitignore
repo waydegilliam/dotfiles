@@ -8,6 +8,7 @@ fish/.config/fish/functions/_*
 fish/.config/fish/functions/tide*
 fish/.config/fish/functions/fisher.fish
 fish/.config/fish/functions/fzf_configure_bindings.fish
+fish/.config/fish/functions/fish_prompt.fish
 fish/.config/fish/fish_variables
 *.fish.backup
 
