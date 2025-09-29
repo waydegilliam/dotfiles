@@ -63,9 +63,6 @@ switch (uname)
     # Add nvim to $PATH
     set -x PATH /opt/nvim-linux64/bin $PATH
 
-    # Add pyenv to $PATH
-    set -x PATH $HOME/.pyenv/bin $PATH
-
     # Cuda stuff
     set -x PATH /usr/local/cuda-11.3/bin $PATH
     set -x LD_LIBRARY_PATH /usr/local/cuda-11.3/lib64 $LD_LIBRARY_PATH
@@ -131,7 +128,6 @@ alias c clear
 alias logout exit
 alias watch-gpu "watch -n0.1 nvidia-smi"
 alias lg lazygit
-alias claude="/Users/waydegilliam/.claude/local/claude"
 
 switch (uname)
   case Darwin
@@ -182,9 +178,6 @@ if type fnm -q && status is-interactive
   fnm env --shell fish --use-on-cd | source
 end
 
-# pyenv
-pyenv init - | source
-
 # direnv
 direnv hook fish | source
 
@@ -194,3 +187,5 @@ if test -d venv
   source ./venv/bin/activate.fish
 end
 
+# orbstack
+source ~/.orbstack/shell/init2.fish 2>/dev/null || :
