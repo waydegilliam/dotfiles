@@ -44,6 +44,7 @@ BREW_PACKAGES=(
   lua
   lua-language-server
   neovim
+  orbstack
   postgresql
   ripgrep
   rust-analyzer
