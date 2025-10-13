@@ -57,8 +57,10 @@ BREW_PACKAGES=(
 )
 
 BREW_CASKS=(
-  ngrok
   alt-tab
+  monitorcontrol
+  ngrok
+  rectangle
 )
 
 # Install Macos packages
