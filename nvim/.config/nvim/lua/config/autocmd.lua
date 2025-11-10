@@ -78,12 +78,3 @@ if SSH_CLIENT and SSH_CLIENT ~= "" then
 		end,
 	})
 end
-
--- vim.api.nvim_create_augroup("DockerComposeFiletype", {clear = true})
--- vim.api.nvim_create_autocmd({"BufRead", "BufNewFile"}, {
---   group = "DockerComposeFiletype",
---   pattern = {"docker-compose.yml", "docker-compose.*.yml"},
---   callback = function()
---     vim.bo.filetype = "dockercompose"
---   end
--- })
