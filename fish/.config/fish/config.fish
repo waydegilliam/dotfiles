@@ -188,3 +188,9 @@ end
 
 # orbstack
 source ~/.orbstack/shell/init2.fish 2>/dev/null || :
+
+# mise
+mise activate fish | source
+
+# aws
+set -x AWS_PAGER "bat -l man -p"
