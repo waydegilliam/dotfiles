@@ -38,17 +38,14 @@ set -x MANPAGER "sh -c 'col -bx | bat -l man -p'"
 switch (uname)
   case Darwin
     # brew
-    set -x PATH /opt/homebrew/bin $PATH
+    fish_add_path /opt/homebrew/bin
     set -x HOMEBREW_NO_ENV_HINTS 1
-
-    # lazygit needs this explicitly specified
-    set -x XDG_CONFIG_HOME $HOME/.config
 
     # nvim
     set -x PATH /opt/nvim-macos/bin $PATH
 
     # vscode
-    set -x PATH /Applications/Visual\ Studio\ Code.app/Contents/Resources/app/bin $PATH
+    fish_add_path /Applications/Visual\ Studio\ Code.app/Contents/Resources/app/bin
 
     # psql
     fish_add_path /opt/homebrew/opt/postgresql@16/bin/psql
@@ -57,7 +54,10 @@ switch (uname)
     set -x EZA_CONFIG_DIR $HOME/.config/eza
 
     # karabiner cli
-    set -x PATH /Library/Application\ Support/org.pqrs/Karabiner-Elements/bin $PATH
+    fish_add_path /Library/Application\ Support/org.pqrs/Karabiner-Elements/bin
+
+    # utm
+    alias utmctl "/Applications/UTM.app/Contents/MacOS/utmctl"
 
   case Linux
     # Add nvim to $PATH
