@@ -122,12 +122,11 @@ alias uvr "uv run"
 
 alias cat bat
 alias nvm fnm
-alias vim nvim
-alias vi nvim
 alias c clear
 alias logout exit
 alias watch-gpu "watch -n0.1 nvidia-smi"
 alias lg lazygit
+alias tf terraform
 
 switch (uname)
   case Darwin
