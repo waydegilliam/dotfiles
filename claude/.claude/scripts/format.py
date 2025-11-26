@@ -29,10 +29,11 @@ PRETTIER_EXTENSIONS = {
 
 
 @dataclass
-class HookData:
-    cwd: Path
-    tool_name: Literal["Edit", "MultiEdit", "Write"]
-    tool_response_file_path: Path
+class StopHookInput:
+    session_id: str
+    transcript_path: Path
+    hook_event_name: Literal["Stop", "SubagentStop"]
+    stop_hook_active: bool
 
 
 def main():
@@ -42,11 +43,16 @@ def main():
         print(f"Error parsing JSON input: {e}", file=sys.stderr)
         sys.exit(1)
 
-    hook_data = HookData(
-        cwd=Path(data["cwd"]),
-        tool_name=data["tool_name"],
-        tool_response_file_path=Path(data["tool_response"]["filePath"]),
+    hook_data = StopHookInput(
+        session_id=data["session_id"],
+        transcript_path=data["transcript_path"],
+        hook_event_name=data["hook_event_name"],
+        stop_hook_active=data["stop_hook_active"],
     )
+
+    # Get files created/modified in the transcript
+    # For each file, run the appropriate formatter
+    # If any errors, block stopage and show the errors
 
     file_suffix = hook_data.tool_response_file_path.suffix.lower().lstrip(".")
 
