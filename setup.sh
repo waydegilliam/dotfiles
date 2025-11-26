@@ -81,6 +81,9 @@ fi
 # Install Bun
 curl -fsSL https://bun.sh/install | bash > /dev/null
 
+# Install uv tools
+uv tool install ruff
+
 # Stow dotfiles
 stow --dir $SCRIPT_DIR --target $HOME "${DOTFILES[@]}"
 

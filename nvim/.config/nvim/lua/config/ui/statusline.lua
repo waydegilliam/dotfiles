@@ -30,12 +30,13 @@ end
 
 local function get_diagnostics()
 	local count = {}
-	local levels = {
-		errors = "Error",
-		warnings = "Warn",
-		info = "Info",
-		hints = "Hint",
-	}
+	local severity = vim.diagnostic and vim.diagnostic.severity or nil
+	local levels = severity and {
+		errors = severity.ERROR,
+		warnings = severity.WARN,
+		info = severity.INFO,
+		hints = severity.HINT,
+	} or {}
 
 	for k, level in pairs(levels) do
 		count[k] = vim.tbl_count(vim.diagnostic.get(0, { severity = level }))
@@ -79,7 +80,12 @@ local function get_zoomed_status()
 end
 
 local function get_lsp_status()
-	local buf_clients = vim.lsp.buf_get_clients()
+	local buf_clients = {}
+	if vim.lsp and type(vim.lsp.get_clients) == "function" then
+		buf_clients = vim.lsp.get_clients({ bufnr = 0 })
+	elseif vim.lsp and type(vim.lsp.buf_get_clients) == "function" then
+		buf_clients = vim.lsp.buf_get_clients(0)
+	end
 	if next(buf_clients) == nil then
 		return ""
 	end
@@ -95,26 +101,43 @@ local function get_lsp_status()
 end
 
 local function get_lsp_progress()
-	local messages = vim.lsp.util.get_progress_messages()
-	if #messages == 0 then
+	if not vim.lsp then
 		return ""
 	end
 
-	local status = {}
-	for _, msg in pairs(messages) do
-		local title = ""
-		if msg.title then
-			title = msg.title
+	-- Prefer the built-in status function when available
+	if type(vim.lsp.status) == "function" then
+		local s = vim.lsp.status()
+		if s and s ~= "" then
+			return " " .. s .. " "
 		end
-		table.insert(status, (msg.percentage or 0) .. "%% " .. title)
 	end
 
-	local spinners =
-		{ "⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏" }
-	local ms = vim.loop.hrtime() / 1000000
-	local frame = math.floor(ms / 120) % #spinners
+	-- Fallback to progress messages API when present
+	local util = vim.lsp.util
+	if util and type(util.get_progress_messages) == "function" then
+		local messages = util.get_progress_messages()
+		if #messages == 0 then
+			return ""
+		end
 
-	return table.concat(status, "  ") .. " " .. spinners[frame + 1]
+		local status = {}
+		for _, msg in pairs(messages) do
+			local title = ""
+			if msg.title then
+				title = msg.title
+			end
+			table.insert(status, (msg.percentage or 0) .. "%% " .. title)
+		end
+
+		local spinners = { "⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏" }
+		local ms = vim.loop.hrtime() / 1000000
+		local frame = math.floor(ms / 120) % #spinners
+
+		return table.concat(status, "  ") .. " " .. spinners[frame + 1]
+	end
+
+	return ""
 end
 
 Statusline = {}

@@ -22,8 +22,8 @@ Plug 'nvim-tree/nvim-web-devicons', {'commit': '47103b80c38c59f7a1b5408c232b92bf
 " Plug 'hrsh7th/cmp-nvim-lsp', {'commit': '44b16d11215dce86f253ce0c30949813c0a90765'}
 " Plug 'L3MON4D3/LuaSnip', {'commit': 'a4de64570b9620875c8ea04175cd07ed8e32ac99'}
 
-" " LSP
-" Plug 'neovim/nvim-lspconfig', {'commit': 'b0852218bc5fa6514a71a9da6d5cfa63a263c83d'}
+" LSP
+Plug 'neovim/nvim-lspconfig'
 
 " Treesitter
 Plug 'nvim-treesitter/nvim-treesitter', {'commit': '8996612bfbebe1657e1bb55a95201c96cab945c6', 'do': 'TSUpdate'}
@@ -31,7 +31,6 @@ Plug 'nvim-treesitter/nvim-treesitter', {'commit': '8996612bfbebe1657e1bb55a9520
 " Language-specific plugins
 Plug 'dag/vim-fish', {'commit': '50b95cbbcd09c046121367d49039710e9dc9c15f'}
 Plug 'windwp/nvim-ts-autotag', {'commit': '6be1192965df35f94b8ea6d323354f7dc7a557e4'}
-Plug 'jose-elias-alvarez/typescript.nvim', {'commit': '4de85ef699d7e6010528dcfbddc2ed4c2c421467'}
 Plug 'JoosepAlviste/nvim-ts-context-commentstring', {'commit': '92e688f013c69f90c9bbd596019ec10235bc51de'}
 Plug 'maxmellon/vim-jsx-pretty', {'commit': '6989f1663cc03d7da72b5ef1c03f87e6ddb70b41'}
 
@@ -40,7 +39,6 @@ Plug 'phaazon/hop.nvim'
 " Plug 'lewis6991/gitsigns.nvim'
 Plug 'windwp/nvim-autopairs'
 Plug 'jpalardy/vim-slime'
-Plug 'jose-elias-alvarez/null-ls.nvim'
 " Plug 'kevinhwang91/nvim-ufo', {'commit': 'a346e88c776a7089291c883705c5cd8a6ce67558'}
 " Plug 'kevinhwang91/promise-async', {'commit': '70b09063cdf029079b25c7925e4494e7416ee995'}
 Plug 'dhruvasagar/vim-zoom', {'commit': '9f281ac7766c3931cb87698602eeb33a62660ae2'}
@@ -51,7 +49,6 @@ Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
 Plug 'junegunn/fzf.vim'
 
 Plug 'numToStr/Comment.nvim', {'commit': '5f01c1a89adafc52bf34e3bf690f80d9d726715d'}
-" Plug 'folke/zen-mode.nvim'
 Plug 'ruanyl/vim-gh-line'
 Plug 'ojroques/vim-oscyank', {'branch': 'main'}
 Plug 'evanleck/vim-svelte'
@@ -64,10 +61,9 @@ call plug#end()
 
 " Load configs
 lua require("config.autocmd")
-lua require("config.clipboard")
 
 " Load plugin configs (preserve order)
-" lua require("config.plugins.lsp-config")
+lua require("config.plugins.lsp-config")
 " lua require("config.plugins.ufo")
 lua require("config.plugins.nvim-tree")
 " lua require("config.plugins.gitsigns")
@@ -75,9 +71,7 @@ lua require("config.plugins.nvim-tree")
 lua require("config.plugins.hop")
 lua require("config.plugins.treesitter")
 lua require("config.plugins.autopairs")
-lua require("config.plugins.null-ls")
 lua require("config.plugins.comment")
-" lua require("config.plugins.zen-mode")
 
 " Options
 set clipboard=unnamedplus

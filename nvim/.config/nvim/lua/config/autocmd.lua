@@ -25,9 +25,6 @@ vim.api.nvim_create_autocmd({ "TextYankPost" }, {
 	end,
 })
 
--- Null-ls format on save
-vim.api.nvim_create_augroup("LspFormatting", { clear = true })
-
 -- Set tmux filetype for all tmux conf files
 vim.api.nvim_create_augroup("TmuxConf", { clear = true })
 vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, {

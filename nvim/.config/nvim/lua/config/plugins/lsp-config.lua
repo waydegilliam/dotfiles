@@ -4,12 +4,6 @@ if not lspconfig_ok then
 	return
 end
 
-local typescript_ok, typescript = pcall(require, "typescript")
-if not typescript_ok then
-	print("'typescript' not installed")
-	return
-end
-
 -- Diagnostic signs
 
 local signs = {
@@ -62,21 +56,6 @@ lspconfig.pyright.setup({
 	capabilities = capabilities,
 	filetypes = { "python" },
 	handlers = handlers,
-})
-
-typescript.setup({
-	server = {
-		capabilities = capabilities,
-		filetypes = {
-			"typescript",
-			"typescriptreact",
-			"javascript",
-			"javascriptreact",
-		},
-		on_attach = function(client)
-			client.server_capabilities.document_formatting = false
-		end,
-	},
 })
 
 lspconfig.vimls.setup({
@@ -146,28 +125,17 @@ lspconfig.svelte.setup({
 	capabilities = capabilities,
 })
 
-lspconfig.ruff_lsp.setup({
-	cmd = { vim.fn.stdpath("config") .. "/venv/bin/ruff-lsp" },
+lspconfig.ruff.setup({
 	capabilities = capabilities,
 	on_attach = function(client, bufnr)
+		-- Format on save
 		if client.supports_method("textDocument/formatting") then
-			vim.lsp.buf.format({ bufnr = bufnr })
 			vim.api.nvim_create_autocmd("BufWritePre", {
 				buffer = bufnr,
 				callback = function()
-					vim.lsp.buf.format({ bufnr = bufnr })
+					vim.lsp.buf.format({ bufnr = bufnr, async = false })
 				end,
 			})
 		end
 	end,
-	init_options = {
-		settings = {
-			-- args = {format = ["--con"]}
-			format = {
-				args = {
-					"--config=/Users/waydegg/Development/mentat-main/pyproject.toml",
-				},
-			},
-		},
-	},
 })
