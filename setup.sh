@@ -7,7 +7,6 @@ DOTFILES=(
   bat
   claude
   cursor
-  direnv
   eza
   fish
   ghostty
@@ -25,7 +24,6 @@ DOTFILES=(
 
 BREW_PACKAGES=(
   bat
-  direnv
   docker
   docker-compose
   eza

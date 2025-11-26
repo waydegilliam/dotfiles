@@ -23,9 +23,6 @@ set -x RUSTUP_HOME $HOME/.config/rustup
 set -x CARGO_HOME $HOME/.config/cargo
 set -x PATH $HOME/.config/cargo/bin $PATH
 
-# direnv
-set -x DIRENV_LOG_FORMAT ""
-
 # Add $HOME/.local/bin to path (pipx puts executables here)
 set -x PATH $HOME/.local/bin $PATH
 

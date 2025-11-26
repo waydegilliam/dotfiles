@@ -132,11 +132,6 @@ curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo 
 && sudo apt update \
 && sudo apt install gh -y
 
-# Install direnv
-wget https://github.com/direnv/direnv/releases/download/v2.32.1/direnv.linux-amd64 -O ~/Downloads/direnv
-sudo chmod +x ~/Downloads/direnv
-sudo mv ~/Downloads/direnv /usr/local/bin
-
 # Install bun
 curl -fsSL https://bun.sh/install | bash
 
@@ -211,7 +206,7 @@ rm ~/.config/fish/config.fish ~/.config/fish/functions/fish_mode_prompt.fish
 
 # Stow everything
 stow -d ghq/github.com/waydegg/dotfiles-public -t $HOME \
-  bat direnv fish ipython npm nvim pgcli prettier stylua tmux
+  bat fish ipython npm nvim pgcli prettier stylua tmux
 
 # Enable vi mode for fish
 fish -c "fish_vi_key_bindings"
