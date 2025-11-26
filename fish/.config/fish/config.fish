@@ -174,9 +174,6 @@ if type fnm -q && status is-interactive
   fnm env --shell fish --use-on-cd | source
 end
 
-# direnv
-direnv hook fish | source
-
 # venv
 set -e VIRTUAL_ENV
 if test -d venv
