@@ -93,6 +93,9 @@ alias gwta "git worktree add"
 alias gwtl "git worktree list"
 alias gwtr "git worktree remove"
 
+alias gtc "gt checkout"
+alias gts "gt sync"
+
 alias t tmux
 alias ts "tmux ls"
 alias tk "tmux kill-session -t"
