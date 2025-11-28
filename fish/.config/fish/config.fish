@@ -95,6 +95,8 @@ alias gwtr "git worktree remove"
 
 alias gtc "gt checkout"
 alias gts "gt sync"
+alias gtl "gt log"
+alias gtls "gt log short"
 
 alias t tmux
 alias ts "tmux ls"
