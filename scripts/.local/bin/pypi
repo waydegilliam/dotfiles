@@ -30,7 +30,7 @@ class PackageInfo:
     author_email: str | None
     project_url: str
     package_url: str
-    last_release_at: datetime
+    last_release_at: datetime | None
 
     def __repr__(self):
         package_info_repr = f"""
@@ -70,8 +70,10 @@ def check(package: str, with_description: bool):
     response_json = response.json()
 
     release_groups = response_json["releases"].values()
-    releases = chain.from_iterable(release_groups)
+    releases = list(chain.from_iterable(release_groups))
     releases_sorted = sorted(releases, key=lambda e: datetime.fromisoformat(e["upload_time"]), reverse=True)
+
+    last_release_at = datetime.fromisoformat(releases_sorted[0]["upload_time"]) if releases_sorted else None
 
     package_info = PackageInfo(
         name=response_json["info"]["name"],
@@ -82,7 +84,7 @@ def check(package: str, with_description: bool):
         author_email=response_json["info"]["author_email"],
         project_url=response_json["info"]["home_page"],
         package_url=response_json["info"]["package_url"],
-        last_release_at=datetime.fromisoformat(releases_sorted[0]["upload_time"]),
+        last_release_at=last_release_at,
     )
 
     console.print(package_info.__repr__())
