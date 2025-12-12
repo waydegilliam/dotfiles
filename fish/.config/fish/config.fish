@@ -97,6 +97,7 @@ alias gtc "gt checkout"
 alias gts "gt sync"
 alias gtl "gt log"
 alias gtls "gt log short"
+alias gtsp "gt submit --publish"
 
 alias t tmux
 alias ts "tmux ls"
