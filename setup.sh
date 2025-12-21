@@ -162,7 +162,13 @@ fi
 # Configure Fish shell
 if command -v fish &> /dev/null; then
   fish -c "type -q fisher; or curl -sL https://git.io/fisher | source && fisher install jorgebucaran/fisher"
-  fish -c "fisher update"
+  fish_plugins=(
+    jorgebucaran/fisher
+    jethrokuan/z
+    patrickf1/fzf.fish
+    IlanCosman/tide@v6
+  )
+  fish -c "fisher install ${fish_plugins[*]}"
   fish -c "fish_vi_key_bindings"
 else
   echo "Fish not found in PATH; expected fish to be installed." >&2
