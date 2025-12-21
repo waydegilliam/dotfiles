@@ -169,7 +169,8 @@ function __rename_tmux_window --on-variable PWD --description 'Change the tmux w
 
     set repo_path (git rev-parse --show-toplevel)
     set repo_name (basename $repo_path)
-    tmux rename-window $repo_name
+    set repo_parent (basename (dirname $repo_path))
+    tmux rename-window "$repo_parent/$repo_name"
   end
 end
 
