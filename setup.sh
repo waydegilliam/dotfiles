@@ -1,6 +1,7 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+MISE_VERSION="v2025.12.20"
 
 DOTFILES=(
   bash
@@ -13,6 +14,7 @@ DOTFILES=(
   git
   ipython
   karabiner
+  mise
   npm
   nvim
   ruff
@@ -23,35 +25,16 @@ DOTFILES=(
 )
 
 BREW_PACKAGES=(
-  bat
   docker
-  docker-compose
-  eza
-  fd
   fish
   fisher
-  fnm
-  fx
-  fzf
-  gh
-  ghq
-  git-delta
-  go
   htop
-  jq
-  lua
-  lua-language-server
-  neovim
   orbstack
   postgresql
-  ripgrep
-  rust-analyzer
   stow
-  stylua
   tmux
   tree
   universal-ctags
-  yarn
 )
 
 BREW_CASKS=(
@@ -61,35 +44,75 @@ BREW_CASKS=(
   rectangle
 )
 
-# Install Macos packages
-if [[ "$OSTYPE" == "darwin"* ]]; then
-    # Install Homebrew if not installed
-    if ! command -v brew &> /dev/null; then
-        /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-    fi
-    
-    # Update Homebrew
-    brew update
+APT_PACKAGES=(
+  docker.io
+  fish
+  git
+  htop
+  postgresql
+  postgresql-contrib
+  stow
+  tmux
+  tree
+  universal-ctags 
+  unzip
+)
 
-    # Install packages
-    brew install --quiet "${BREW_PACKAGES[@]}"
+is_macos() {
+  [[ "$OSTYPE" == "darwin"* ]]
+}
 
-    # Install casks
-    brew install --quiet --cask "${BREW_CASKS[@]}"
+is_linux() {
+  [[ "$OSTYPE" == "linux"* ]]
+}
+
+# Install packages
+if is_macos; then
+  # Install Homebrew if not installed
+  if ! command -v brew &> /dev/null; then
+    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+  fi
+
+  # Update Homebrew
+  brew update
+
+  # Install packages
+  brew install --quiet "${BREW_PACKAGES[@]}"
+
+  # Install casks
+  brew install --quiet --cask "${BREW_CASKS[@]}"
 fi
 
-# Install Bun
-curl -fsSL https://bun.sh/install | bash > /dev/null
+if is_linux; then
+  sudo apt update
+  sudo apt install -y ca-certificates curl gnupg lsb-release
 
-# Install uv tools
-uv tool install ruff
+  for pkg in "${APT_PACKAGES[@]}"; do
+    if apt-cache show "$pkg" 2>/dev/null | grep -q '^Package:'; then
+      sudo apt install -y "$pkg"
+    else
+      echo "Skipping $pkg (not in apt for this Ubuntu release)"
+    fi
+  done
+fi
+
+# Install Mise
+curl https://mise.run | sh 
 
 # Stow dotfiles
 stow --dir $SCRIPT_DIR --target $HOME "${DOTFILES[@]}"
 
+# Install Mise tools
+mise install
+
 # Configure Fish shell
-fish -c "fisher update"
-fish -c "fish_vi_key_bindings"
+if command -v fish &> /dev/null; then
+  fish -c "type -q fisher; or curl -sL https://git.io/fisher | source && fisher install jorgebucaran/fisher"
+  fish -c "fisher update"
+  fish -c "fish_vi_key_bindings"
+fi
 
 # Silence Unix login message
-touch ~/.hushlogin
+if is_macos; then
+  touch ~/.hushlogin
+fi
