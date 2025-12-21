@@ -124,7 +124,6 @@ alias dnl "docker network ls"
 alias uvr "uv run"
 
 alias cat bat
-alias nvm fnm
 alias c clear
 alias logout exit
 alias watch-gpu "watch -n0.1 nvidia-smi"
@@ -175,11 +174,6 @@ function __rename_tmux_window --on-variable PWD --description 'Change the tmux w
 end
 
 # ===== Tool setup ============================================================
-# fnm
-if type fnm -q && status is-interactive 
-  fnm env --shell fish --use-on-cd | source
-end
-
 # venv
 set -e VIRTUAL_ENV
 if test -d venv
