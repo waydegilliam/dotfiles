@@ -153,7 +153,7 @@ if [[ -n "$MISE_BIN" ]]; then
     MISE_CONFIG_FILE="$SCRIPT_DIR/mise/.config/mise/config.toml"
     export MISE_CONFIG_FILE
   fi
-  "$MISE_BIN" install
+  MISE_JOBS=1 "$MISE_BIN" install
 else
   echo "Skipping mise install (mise not found in PATH or ~/.local/bin)"
 fi
