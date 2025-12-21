@@ -1,9 +1,3 @@
-local lspconfig_ok, lspconfig = pcall(require, "lspconfig")
-if not lspconfig_ok then
-	print("'lspconfig' not installed")
-	return
-end
-
 -- Diagnostic signs
 
 local signs = {
@@ -52,19 +46,27 @@ capabilities.textDocument.completion.completionItem.snippetSupport = true
 
 -- LSP config
 
-lspconfig.pyright.setup({
+vim.lsp.config("*", {
 	capabilities = capabilities,
-	filetypes = { "python" },
 	handlers = handlers,
 })
 
-lspconfig.vimls.setup({
-	capabilities = capabilities,
+local function enable(server, opts)
+	if opts then
+		vim.lsp.config(server, opts)
+	end
+	vim.lsp.enable(server)
+end
+
+enable("pyright", {
+	filetypes = { "python" },
+})
+
+enable("vimls", {
 	filetypes = { "vim" },
 })
 
-lspconfig.lua_ls.setup({
-	capabilities = capabilities,
+enable("lua_ls", {
 	filetypes = { "lua" },
 	settings = {
 		Lua = {
@@ -83,17 +85,15 @@ lspconfig.lua_ls.setup({
 		},
 	},
 	on_attach = function(client)
-		client.server_capabilities.document_formatting = false
+		client.server_capabilities.documentFormattingProvider = false
 	end,
 })
 
-lspconfig.rust_analyzer.setup({
-	capabilities = capabilities,
+enable("rust_analyzer", {
 	filetypes = { "rust" },
 })
 
-lspconfig.html.setup({
-	capabilities = capabilities,
+enable("html", {
 	filetypes = { "html" },
 	init_options = {
 		configurationSection = { "html", "css", "javascript" },
@@ -103,33 +103,26 @@ lspconfig.html.setup({
 		},
 	},
 	on_attach = function(client)
-		client.server_capabilities.document_formatting = false
+		client.server_capabilities.documentFormattingProvider = false
 	end,
 })
 
-lspconfig.cssls.setup({
-	capabilities = capabilities,
+enable("cssls", {
 	filetypes = { "css", "scss", "less" },
 })
 
-lspconfig.vuels.setup({
-	capabilities = capabilities,
+enable("vuels", {
 	filetypes = { "vue" },
 })
 
-lspconfig.tailwindcss.setup({
-	capabilities = capabilities,
-})
+enable("tailwindcss")
 
-lspconfig.svelte.setup({
-	capabilities = capabilities,
-})
+enable("svelte")
 
-lspconfig.ruff.setup({
-	capabilities = capabilities,
+enable("ruff", {
 	on_attach = function(client, bufnr)
 		-- Format on save
-		if client.supports_method("textDocument/formatting") then
+		if client:supports_method("textDocument/formatting") then
 			vim.api.nvim_create_autocmd("BufWritePre", {
 				buffer = bufnr,
 				callback = function()
