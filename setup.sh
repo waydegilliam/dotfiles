@@ -155,7 +155,8 @@ if [[ -n "$MISE_BIN" ]]; then
   fi
   MISE_JOBS=1 "$MISE_BIN" install
 else
-  echo "Skipping mise install (mise not found in PATH or ~/.local/bin)"
+  echo "Mise not found in PATH or ~/.local/bin; expected mise to be installed." >&2
+  exit 1
 fi
 
 # Configure Fish shell
@@ -163,6 +164,9 @@ if command -v fish &> /dev/null; then
   fish -c "type -q fisher; or curl -sL https://git.io/fisher | source && fisher install jorgebucaran/fisher"
   fish -c "fisher update"
   fish -c "fish_vi_key_bindings"
+else
+  echo "Fish not found in PATH; expected fish to be installed." >&2
+  exit 1
 fi
 
 # Silence Unix login message
