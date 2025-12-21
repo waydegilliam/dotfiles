@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-MISE_VERSION="v2025.12.20"
 
 DOTFILES=(
   bash
@@ -110,7 +109,7 @@ fi
 
 # Install Mise
 if ! command -v mise &> /dev/null; then
-  curl https://mise.run | MISE_VERSION="$MISE_VERSION" sh
+  curl -fsSL https://mise.run | sh
 fi
 
 MISE_BIN="$(command -v mise || true)"
@@ -129,11 +128,31 @@ for pkg in "${DOTFILES[@]}"; do
 done
 
 if ((${#stow_packages[@]})); then
-  stow --dir "$SCRIPT_DIR" --target "$HOME" "${stow_packages[@]}"
+  stow_args=()
+  if [[ "${STOW_ADOPT:-0}" == "1" ]]; then
+    stow_args+=(--adopt)
+  fi
+
+  for pkg in "${stow_packages[@]}"; do
+    if [[ "$pkg" == "fish" && -e "$HOME/.config/fish" ]]; then
+      backup_path="/tmp/fish-config-backup-$(date +%Y%m%d%H%M%S)"
+      echo "Backing up existing fish config to $backup_path"
+      mv "$HOME/.config/fish" "$backup_path"
+    fi
+
+    if ! stow --dir "$SCRIPT_DIR" --target "$HOME" "${stow_args[@]}" "$pkg"; then
+      echo "Skipping stow package $pkg (conflicts or errors)"
+    fi
+  done
 fi
 
 # Install Mise tools
 if [[ -n "$MISE_BIN" ]]; then
+  mise_config="$HOME/.config/mise/config.toml"
+  if [[ -f "$SCRIPT_DIR/mise/.config/mise/config.toml" && ! -f "$mise_config" ]]; then
+    MISE_CONFIG_FILE="$SCRIPT_DIR/mise/.config/mise/config.toml"
+    export MISE_CONFIG_FILE
+  fi
   "$MISE_BIN" install
 else
   echo "Skipping mise install (mise not found in PATH or ~/.local/bin)"
