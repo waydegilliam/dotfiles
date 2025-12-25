@@ -29,7 +29,7 @@ Plug 'maxmellon/vim-jsx-pretty', {'commit': '6989f1663cc03d7da72b5ef1c03f87e6ddb
 
 " Misc
 Plug 'phaazon/hop.nvim'
-" Plug 'lewis6991/gitsigns.nvim'
+Plug 'lewis6991/gitsigns.nvim'
 Plug 'windwp/nvim-autopairs'
 Plug 'jpalardy/vim-slime'
 " Plug 'kevinhwang91/nvim-ufo', {'commit': 'a346e88c776a7089291c883705c5cd8a6ce67558'}
@@ -58,7 +58,7 @@ lua require("config.autocmd")
 lua require("config.plugins.lsp-config")
 " lua require("config.plugins.ufo")
 lua require("config.plugins.nvim-tree")
-" lua require("config.plugins.gitsigns")
+lua require("config.plugins.gitsigns")
 " lua require("config.plugins.cmp")
 lua require("config.plugins.hop")
 lua require("config.plugins.treesitter")
@@ -137,8 +137,8 @@ nnoremap gB <cmd>bprevious<cr>
 " Nvim Tree
 nnoremap <leader>e <cmd>NvimTreeToggle<cr>
 
-" " Gitsigns
-" nnoremap <leader>gh <cmd>Gitsigns preview_hunk<cr>
+" Gitsigns
+nnoremap <leader>gh <cmd>Gitsigns preview_hunk<cr>
 
 " " Hop
 nnoremap f <cmd>HopWord<cr>
