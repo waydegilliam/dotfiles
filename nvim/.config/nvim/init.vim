@@ -102,6 +102,9 @@ colorscheme github_light_default
 " Python venv
 let g:python3_host_prog = stdpath('config') . '/venv/bin/python'
 
+" FZF
+let g:fzf_vim = {}
+let g:fzf_vim.preview_window = []
 
 " --- Keybinds ----------------------------------------------------------------
 let mapleader = ' '
@@ -147,8 +150,8 @@ vnoremap f <cmd>HopWord<cr>
 vnoremap F <cmd>HopLine<cr>
 
 " FZF
-nnoremap <leader>ff <cmd>FzfFiles<cr>
-nnoremap <leader>fg <cmd>FzfGrep<cr>
+nnoremap <leader>ff <cmd>Files<cr>
+nnoremap <leader>fg <cmd>Rg<cr> 
 
 " " Show LSP info
 " nnoremap gd <cmd>lua vim.lsp.buf.definition()<cr>
