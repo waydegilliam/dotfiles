@@ -68,6 +68,25 @@ end
 # Add bun to PATH
 set -x PATH $HOME/.bun/bin $PATH
 
+# fzf
+set -gx FZF_DEFAULT_COMMAND 'fd --type f --hidden \
+  --exclude .git \
+  --exclude venv \
+  --exclude .venv \
+  --exclude __pycache__ \
+  --exclude .mypy_cache \
+  --exclude .ipynb_checkpoints \
+  --exclude "*.egg-info" \
+  --exclude .ruff_cache \
+  --exclude .nitro \
+  --exclude .output \
+  --exclude .pytest_cache \
+  --exclude .tanstack \
+  --exclude node_modules \
+  --exclude .pnpm-store \
+  --exclude .uv-cache \
+  --exclude .cache'
+
 
 # ===== Aliases ================================================================
 alias ls "ls -p -G"
