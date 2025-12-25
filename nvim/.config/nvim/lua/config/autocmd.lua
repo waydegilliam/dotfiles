@@ -1,3 +1,24 @@
+-- Startup screen
+vim.api.nvim_create_augroup("StartupScreen", { clear = true })
+vim.api.nvim_create_autocmd("VimEnter", {
+	group = "StartupScreen",
+	callback = function()
+		require("config.ui.startup").setup()
+	end,
+})
+vim.api.nvim_create_autocmd("VimResized", {
+	group = "StartupScreen",
+	callback = function()
+		require("config.ui.startup").render()
+	end,
+})
+vim.api.nvim_create_autocmd("BufEnter", {
+	group = "StartupScreen",
+	callback = function()
+		require("config.ui.startup").restore_options()
+	end,
+})
+
 -- Reload statusline on window/buffer change
 vim.api.nvim_create_augroup("Statusline", { clear = true })
 vim.api.nvim_create_autocmd({ "BufWinEnter" }, {
