@@ -84,8 +84,6 @@
         "ubuntu-desktop": "linux"
     },
 
-    "cursor.composer.shouldAllowCustomModes": true,
-
     "vim.foldfix": true,
     "vim.easymotion": true,
     "vim.highlightedyank.enable": true,
@@ -163,7 +161,9 @@
         "**/.venv": true,
         "**/*.egg-info/**": true,
         "**/node_modules": true,
-        "**/.pnpm-store": true
+        "**/.pnpm-store": true,
+        "**/.uv-cache": true,
+        "**/.cache": true
     },
 
     "[css]": {
@@ -184,7 +184,7 @@
             "source.fixAll": "explicit",
             "source.organizeImports": "explicit"
         },
-        "diffEditor.ignoreTrimWhitespace": true
+        "diffEditor.ignoreTrimWhitespace": false
     },
     "[shellscript]": {
         "files.eol": "\n",
