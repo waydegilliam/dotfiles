@@ -5,6 +5,9 @@ set fish_greeting ""
 # Set default editor to Neovim
 set -x EDITOR nvim
 
+# Use ~/.config for XDG apps (lazygit, etc.)
+set -gx XDG_CONFIG_HOME "$HOME/.config"
+
 # Tide prompt
 set -g tide_git_color_branch 008700
 set -g tide_git_color_stash 008700

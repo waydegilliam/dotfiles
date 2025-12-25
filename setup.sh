@@ -12,6 +12,7 @@ DOTFILES=(
   ghostty
   git
   ipython
+  lazygit
   mise
   npm
   nvim
