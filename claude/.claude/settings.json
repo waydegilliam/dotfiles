@@ -47,6 +47,9 @@
       "WebFetch(domain:python.temporal.io)",
       "WebFetch(domain:react.dev)",
       "WebFetch(domain:tanstack.com)"
+    ],
+    "deny": [
+      "WebFetch(domain:dev.to)"
     ]
   },
   "alwaysThinkingEnabled": true
