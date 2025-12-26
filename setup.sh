@@ -16,6 +16,7 @@ DOTFILES=(
   mise
   npm
   nvim
+  prettier
   ruff
   scripts
   stylua

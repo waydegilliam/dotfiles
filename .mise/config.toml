@@ -1,0 +1,6 @@
+[tools]
+prettier = "3.7.4"
+
+[tasks.format]
+run = "prettier --write ."
+description = "Format files with prettier"
