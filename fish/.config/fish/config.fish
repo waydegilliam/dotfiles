@@ -59,6 +59,9 @@ switch (uname)
     # utm
     alias utmctl "/Applications/UTM.app/Contents/MacOS/utmctl"
 
+    # orbstack
+    source ~/.orbstack/shell/init2.fish 2>/dev/null || :
+
   case Linux
     # Add nvim to $PATH
     set -x PATH /opt/nvim-linux64/bin $PATH
@@ -149,6 +152,7 @@ alias cat bat
 alias c clear
 alias logout exit
 alias watch-gpu "watch -n0.1 nvidia-smi"
+alias ld lazydocker
 alias lg lazygit
 alias tf terraform
 
@@ -168,43 +172,12 @@ bind -M insert \cn history-search-forward
 # Exit insert mode 
 bind -M insert -m default jk force-repaint
 
-# ===== Auto-running Functions ================================================
-function __check_venv --on-variable PWD --description 'Source venv (if exists) on directory change'
-  status --is-command-substitution; and return
-  if test -d venv
-    source ./venv/bin/activate.fish
-  else if test -d .venv
-    source ./.venv/bin/activate.fish
-  end
-end
-
-function __rename_tmux_window --on-variable PWD --description 'Change the tmux window to the current git directory name'
-  git rev-parse --is-inside-work-tree &>/dev/null
-  if test $status -eq 0 && test -n "$TMUX"
-
-    # Don't change window name if a custom name was set
-    set tmux_win_id (tmux display-message -p "#I") 
-    set tmux_custom_win_name (tmux show-environment | grep "^tmux_win_$tmux_win_id")
-    if test $status -eq 0 
-      return
-    end
-
-    set repo_path (git rev-parse --show-toplevel)
-    set repo_name (basename $repo_path)
-    set repo_parent (basename (dirname $repo_path))
-    tmux rename-window "$repo_parent/$repo_name"
-  end
-end
-
 # ===== Tool setup ============================================================
 # venv
 set -e VIRTUAL_ENV
 if test -d venv
   source ./venv/bin/activate.fish
 end
-
-# orbstack
-source ~/.orbstack/shell/init2.fish 2>/dev/null || :
 
 # mise
 mise activate fish | source
