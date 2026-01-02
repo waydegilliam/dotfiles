@@ -49,8 +49,10 @@ BREW_CASKS=(
 )
 
 APT_PACKAGES=(
+  build-essential
   git
   htop
+  make
   postgresql
   postgresql-contrib
   stow
@@ -147,6 +149,22 @@ fi
 MISE_BIN="$(command -v mise || true)"
 if [[ -z "$MISE_BIN" && -x "$HOME/.local/bin/mise" ]]; then
   MISE_BIN="$HOME/.local/bin/mise"
+fi
+
+if [[ -z "${GITHUB_TOKEN:-}" && -z "${GH_TOKEN:-}" ]] && command -v gh &> /dev/null; then
+  gh_token="$(gh auth token 2>/dev/null || true)"
+  if [[ -n "$gh_token" ]]; then
+    export GITHUB_TOKEN="$gh_token"
+    export GH_TOKEN="$gh_token"
+  fi
+fi
+
+github_api_token="${GITHUB_TOKEN:-${GH_TOKEN:-}}"
+if [[ -n "$github_api_token" && -z "${MISE_GITHUB_TOKEN:-}" ]]; then
+  export MISE_GITHUB_TOKEN="$github_api_token"
+fi
+if [[ -n "$github_api_token" && -z "${AQUA_GITHUB_TOKEN:-}" ]]; then
+  export AQUA_GITHUB_TOKEN="$github_api_token"
 fi
 
 # Stow dotfiles
