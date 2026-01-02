@@ -17,6 +17,7 @@ fish/.config/fish/completions/*
 !fish/.config/fish/completions/pip.fish
 
 fish/.config/fish/conf.d/*
-!fish/.config/fish/conf.d/fnm.fish
+!fish/.config/fish/conf.d/00-auto-venv.fish
+!fish/.config/fish/conf.d/01-tmux-window.fish
 
 ghostty/.config/ghostty/*.bak
