@@ -33,6 +33,7 @@ BREW_PACKAGES=(
   fish
   fisher
   htop
+  lua
   orbstack
   postgresql
   stow
@@ -52,6 +53,7 @@ APT_PACKAGES=(
   build-essential
   git
   htop
+  lua5.4
   make
   postgresql
   postgresql-contrib
