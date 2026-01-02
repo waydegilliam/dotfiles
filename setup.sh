@@ -146,68 +146,44 @@ if ! command -v mise &> /dev/null; then
   curl -fsSL https://mise.run | sh
 fi
 
-MISE_BIN="$(command -v mise || true)"
-if [[ -z "$MISE_BIN" && -x "$HOME/.local/bin/mise" ]]; then
-  MISE_BIN="$HOME/.local/bin/mise"
+# Get mise executable path 
+MISE_BIN="$HOME/.local/bin/mise"
+if [[ ! -x "$MISE_BIN" ]]; then
+  MISE_BIN="$(command -v mise || true)"
 fi
 
-if [[ -z "${GITHUB_TOKEN:-}" && -z "${GH_TOKEN:-}" ]] && command -v gh &> /dev/null; then
-  gh_token="$(gh auth token 2>/dev/null || true)"
-  if [[ -n "$gh_token" ]]; then
-    export GITHUB_TOKEN="$gh_token"
-    export GH_TOKEN="$gh_token"
-  fi
-fi
-
-github_api_token="${GITHUB_TOKEN:-${GH_TOKEN:-}}"
-if [[ -n "$github_api_token" && -z "${MISE_GITHUB_TOKEN:-}" ]]; then
-  export MISE_GITHUB_TOKEN="$github_api_token"
-fi
-if [[ -n "$github_api_token" && -z "${AQUA_GITHUB_TOKEN:-}" ]]; then
-  export AQUA_GITHUB_TOKEN="$github_api_token"
-fi
-
-# Stow dotfiles
-stow_packages=()
-for pkg in "${DOTFILES[@]}"; do
-  if [[ -d "$SCRIPT_DIR/$pkg" ]]; then
-    stow_packages+=("$pkg")
-  else
-    echo "Skipping stow package $pkg (directory missing)"
-  fi
-done
-
-if ((${#stow_packages[@]})); then
-  stow_args=()
-  if [[ "${STOW_ADOPT:-0}" == "1" ]]; then
-    stow_args+=(--adopt)
-  fi
-
-  for pkg in "${stow_packages[@]}"; do
-    if [[ "$pkg" == "fish" && -e "$HOME/.config/fish" ]]; then
-      backup_path="/tmp/fish-config-backup-$(date +%Y%m%d%H%M%S)"
-      echo "Backing up existing fish config to $backup_path"
-      mv "$HOME/.config/fish" "$backup_path"
-    fi
-
-    if ! stow --dir "$SCRIPT_DIR" --target "$HOME" "${stow_args[@]}" "$pkg"; then
-      echo "Skipping stow package $pkg (conflicts or errors)"
-    fi
-  done
-fi
-
-# Install Mise tools
+# Setup mise shims
 if [[ -n "$MISE_BIN" ]]; then
-  mise_config="$HOME/.config/mise/config.toml"
-  if [[ -f "$SCRIPT_DIR/mise/.config/mise/config.toml" && ! -f "$mise_config" ]]; then
-    MISE_CONFIG_FILE="$SCRIPT_DIR/mise/.config/mise/config.toml"
-    export MISE_CONFIG_FILE
-  fi
-  MISE_JOBS=1 "$MISE_BIN" install
+  mise_bin_dir="$(dirname "$MISE_BIN")"
+  case ":$PATH:" in
+    *":$mise_bin_dir:"*) ;;
+    *) export PATH="$mise_bin_dir:$PATH" ;;
+  esac
 else
   echo "Mise not found in PATH or ~/.local/bin; expected mise to be installed." >&2
   exit 1
 fi
+
+# Stow dotfiles, optionally adopting existing files and backing up fish config.
+stow_args=()
+if [[ "${STOW_ADOPT:-0}" == "1" ]]; then
+  stow_args+=(--adopt)
+fi
+
+for pkg in "${DOTFILES[@]}"; do
+  if [[ ! -d "$SCRIPT_DIR/$pkg" ]]; then
+    echo "Skipping stow package $pkg (directory missing)"
+    continue
+  fi
+
+  if ! stow --dir "$SCRIPT_DIR" --target "$HOME" "${stow_args[@]}" "$pkg"; then
+    echo "Skipping stow package $pkg (conflicts or errors)"
+  fi
+done
+
+# Install Mise tools
+export MISE_CONFIG_FILE="$SCRIPT_DIR/mise/.config/mise/config.toml"
+MISE_JOBS=1 "$MISE_BIN" install
 
 # Configure Fish shell
 if command -v fish &> /dev/null; then
