@@ -114,7 +114,7 @@ if is_linux; then
   sudo apt update
   sudo apt install -y ca-certificates curl gnupg lsb-release software-properties-common
 
-  sudo apt-add-repository ppa:fish-shell/release-4
+  sudo apt-add-repository -y ppa:fish-shell/release-4
   sudo apt update
   sudo apt install -y fish
 
