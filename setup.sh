@@ -2,14 +2,12 @@
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 
-DOTFILES=(
+DOTFILES_SERVER=(
   bash
   bat
   claude
-  cursor
   eza
   fish
-  ghostty
   git
   ipython
   lazygit
@@ -21,6 +19,12 @@ DOTFILES=(
   scripts
   stylua
   tmux
+)
+
+DOTFILES_DESKTOP=(
+  code
+  cursor
+  ghostty
   vimium
 )
 
@@ -64,8 +68,27 @@ is_linux() {
   [[ "$OSTYPE" == "linux"* ]]
 }
 
+is_desktop() {
+  if is_macos; then
+    return 0
+  fi
+
+  if [[ -n "${DISPLAY:-}" || -n "${WAYLAND_DISPLAY:-}" || "${XDG_SESSION_TYPE:-}" == "x11" || "${XDG_SESSION_TYPE:-}" == "wayland" ]]; then
+    return 0
+  fi
+
+  if command -v loginctl &> /dev/null && [[ -n "${XDG_SESSION_ID:-}" ]]; then
+    if loginctl show-session "$XDG_SESSION_ID" -p Type 2>/dev/null | grep -Eq 'Type=(x11|wayland)'; then
+      return 0
+    fi
+  fi
+
+  return 1
+}
+
 # Install packages
 if is_macos; then
+  DOTFILES=("${DOTFILES_SERVER[@]}" "${DOTFILES_DESKTOP[@]}")
   # Install Homebrew if not installed
   if ! command -v brew &> /dev/null; then
     /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
@@ -82,6 +105,10 @@ if is_macos; then
 fi
 
 if is_linux; then
+  DOTFILES=("${DOTFILES_SERVER[@]}")
+  if is_desktop; then
+    DOTFILES+=("${DOTFILES_DESKTOP[@]}")
+  fi
   sudo apt update
   sudo apt install -y ca-certificates curl gnupg lsb-release software-properties-common
 
