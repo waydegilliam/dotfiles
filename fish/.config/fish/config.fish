@@ -113,10 +113,6 @@ alias gc "git commit"
 alias gcm "git commit -m"
 alias gci "git commit -m '.'"
 alias gsl "git stash list"
-alias gwt "git worktree"
-alias gwta "git worktree add"
-alias gwtl "git worktree list"
-alias gwtr "git worktree remove"
 
 alias gtc "gt checkout"
 alias gts "gt sync"
@@ -184,3 +180,4 @@ mise activate fish | source
 
 # aws
 set -x AWS_PAGER "bat -l man -p"
+
