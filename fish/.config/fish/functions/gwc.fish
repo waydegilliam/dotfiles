@@ -21,8 +21,9 @@ function gwc --description "Checkout a git worktree"
     set -l formatted
     for line in $worktrees
       set -l path (string split -f1 ' ' -- $line)
+      set -l folder (basename $path)
       set -l branch (string match -rg '\[(.+)\]' -- $line)
-      set -a formatted "$path:::$branch"
+      set -a formatted "$path:::"(printf "%-30s %s" $folder $branch)
     end
 
     set -l selected (printf '%s\n' $formatted | fzf --height=$height --delimiter=':::' --with-nth=2)
