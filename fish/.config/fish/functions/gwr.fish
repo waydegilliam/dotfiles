@@ -1,10 +1,17 @@
 function gwr --description "Remove a git worktree"
-  if test -z "$argv[1]"
-    echo "Usage: gwr [branch name]"
-    return 1
-  end
+  set -l current_path (pwd)
+  set -l main_worktree_path (git worktree list --porcelain | head -n 1 | string replace 'worktree ' '')
 
-  set -l worktree_branch "$argv[1]"
+  set -l worktree_branch
+  if test -n "$argv[1]"
+    set worktree_branch "$argv[1]"
+  else
+    if test "$current_path" = "$main_worktree_path"
+      echo "Error: Already on main worktree. Specify a branch to remove."
+      return 1
+    end
+    set worktree_branch (git branch --show-current)
+  end
   set -l worktree_line (git worktree list | grep -E "\[$worktree_branch\]")
 
   if test -z "$worktree_line"
