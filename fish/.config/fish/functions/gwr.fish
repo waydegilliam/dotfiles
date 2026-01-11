@@ -6,11 +6,29 @@ function gwr --description "Remove a git worktree"
   if test -n "$argv[1]"
     set worktree_branch "$argv[1]"
   else
-    if test "$current_path" = "$main_worktree_path"
-      echo "Error: Already on main worktree. Specify a branch to remove."
+    set -l worktrees (git worktree list)
+    set -l formatted
+    for line in $worktrees
+      set -l path (string split -f1 ' ' -- $line)
+      if test "$path" = "$main_worktree_path"
+        continue
+      end
+      set -l folder (basename $path)
+      set -l branch (string match -rg '\[(.+)\]' -- $line)
+      set -a formatted "$branch:::"(printf "%-30s %s" $folder $branch)
+    end
+
+    if test (count $formatted) -eq 0
+      echo "No worktrees to remove"
       return 1
     end
-    set worktree_branch (git branch --show-current)
+
+    set -l height (math (count $formatted) + 2)
+    set -l selected (printf '%s\n' $formatted | fzf --height=$height --delimiter=':::' --with-nth=2)
+    if test -z "$selected"
+      return 0
+    end
+    set worktree_branch (string split -f1 ':::' -- $selected)
   end
   set -l worktree_line (git worktree list | grep -E "\[$worktree_branch\]")
 

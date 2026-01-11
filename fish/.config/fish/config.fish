@@ -110,7 +110,6 @@ alias gbd "git branch --delete"
 alias gd "git diff"
 alias gds "git diff --staged"
 alias gc "git commit"
-alias gcm "git commit -m"
 alias gci "git commit -m '.'"
 alias gsl "git stash list"
 
