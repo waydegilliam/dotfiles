@@ -5,6 +5,7 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 DOTFILES_SERVER=(
   bash
   bat
+  codex
   claude
   eza
   fish
