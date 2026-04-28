@@ -91,6 +91,8 @@ set foldcolumn=0
 set foldlevel=99
 set foldenable
 set nowrap
+set textwidth=120
+set formatoptions+=t
 set background=light
 set laststatus=3
 set sessionoptions+=tabpages,globals
@@ -196,4 +198,3 @@ nnoremap <leader>n <cmd>tabnext<cr>
 nnoremap <leader>p <cmd>tabprevious<cr>
 nnoremap <leader>c <cmd>tabnew<cr>
 nnoremap <leader>x <cmd>tabclose<cr>
-
