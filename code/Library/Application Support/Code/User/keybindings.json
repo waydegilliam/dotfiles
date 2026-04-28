@@ -342,5 +342,9 @@
 		"key": "cmd+l",
 		"command": "chatgpt.addToThread",
 		"when": "editorTextFocus && editor.hasSelection"
+	},
+	{
+		"key": "cmd+shift+r",
+		"command": "workbench.view.extension.github-pull-request"
 	}
 ]

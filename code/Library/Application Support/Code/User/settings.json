@@ -185,7 +185,6 @@
 		"editor.tabSize": 2,
 		"editor.autoIndent": "advanced"
 	},
-	"workbench.activityBar.location": "top",
 	"chat.viewSessions.orientation": "stacked",
 	"githubPullRequests.hideViewedFiles": false,
 	"gitlens.ai.model": "gitkraken",
@@ -194,5 +193,6 @@
 	"git.detectWorktrees": true,
 	"chat.disableAIFeatures": true,
 	"scm.repositories.selectionMode": "single",
-	"scm.defaultViewMode": "tree"
+	"scm.defaultViewMode": "tree",
+	"workbench.activityBar.location": "top"
 }
