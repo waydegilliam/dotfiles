@@ -1,0 +1,11 @@
+# style name or JSON path (default "auto")
+# note: glow does not expand ~ here; pass styles by absolute path via -s instead
+style: "auto"
+# mouse support (TUI-mode only)
+mouse: false
+# use pager to display markdown
+pager: false
+# word-wrap at width
+width: 120
+# show all files, including hidden and ignored.
+all: false

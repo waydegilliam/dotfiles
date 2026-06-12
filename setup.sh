@@ -10,6 +10,7 @@ DOTFILES_SERVER=(
   eza
   fish
   git
+  glow
   ipython
   lazygit
   mise
