@@ -346,5 +346,10 @@
 	{
 		"key": "cmd+shift+r",
 		"command": "workbench.view.extension.github-pull-request"
+	},
+	{
+		"key": "cmd+r",
+		"command": "pr.refreshChanges",
+		"when": "view == 'prStatus:github'"
 	}
 ]
