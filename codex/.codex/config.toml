@@ -1,17 +1,17 @@
 model = "gpt-5.5"
 model_reasoning_effort = "xhigh"
 
+[tui]
+vim_mode_default = true
+
 [features]
 steer = true
 multi_agent = true
+hooks = true
+goals = true
 
-[mcp_servers.linear]
-url = "https://mcp.linear.app/mcp"
+[mcp_servers.attio]
+url = "https://mcp.attio.com/mcp"
 
-[mcp_servers.sentry]
-command = "npx"
-args = ["-y", "mcp-remote@latest", "https://mcp.sentry.dev/mcp"]
-
-[mcp_servers.chrome-devtools]
-command = "npx"
-args = ["chrome-devtools-mcp@latest"]
+[mcp_servers.granola]
+url = "https://mcp.granola.ai/mcp"
