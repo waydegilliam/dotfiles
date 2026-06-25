@@ -9,9 +9,9 @@ function qq --description "Quick question via codex (fast mode, low thinking)"
     --ephemeral \
     --disable hooks \
     -s read-only \
-    -m gpt-5.5 \
+    -m gpt-5.4-mini \
     -c 'service_tier="fast"' \
-    -c 'model_reasoning_effort="low"' \
+    -c 'model_reasoning_effort="none"' \
     -c 'tools.web_search=true' \
     "$argv" 2>$err | glow -s $HOME/.config/glow/styles/github-light.json -
   set -l exit_code $pipestatus[1]
