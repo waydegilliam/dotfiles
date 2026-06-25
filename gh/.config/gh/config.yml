@@ -1,1 +1,3 @@
 version: "1"
+aliases:
+    pr-url: pr view --json url --jq .url
