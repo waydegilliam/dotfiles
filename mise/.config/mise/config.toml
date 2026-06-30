@@ -1,7 +1,7 @@
 [tools]
 bat = "0.26.1"
 bun = "1.3.5"
-codex = "0.136.0"
+codex = "0.142.4"
 delta = "0.18.2"
 eza = "0.23.4"
 fd = "10.3.0"
@@ -30,3 +30,33 @@ yarn = "4.12.0"
 [settings]
 experimental = true
 python.uv_venv_auto = true
+
+# Disable mise anonymous install statistics for tool installs.
+use_versions_host_track = false
+
+[env]
+# Disable Claude Code telemetry
+CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC = "1"
+DISABLE_ERROR_REPORTING = "1"
+DISABLE_TELEMETRY = "1"
+
+# Ask tools that honor Do Not Track, including Bun, to disable telemetry.
+DO_NOT_TRACK = "1"
+
+# Disable GitHub CLI telemetry.
+GH_TELEMETRY = "disabled"
+
+# Disable Homebrew analytics.
+HOMEBREW_NO_ANALYTICS = "1"
+
+# Export mise's anonymous install statistics opt-out for nested mise invocations.
+MISE_USE_VERSIONS_HOST_TRACK = "false"
+
+# Disable Docker sandbox telemetry.
+SBX_NO_TELEMETRY = "1"
+
+# Disable Sentry CLI telemetry.
+SENTRY_CLI_NO_TELEMETRY = "1"
+
+# Disable Yarn telemetry.
+YARN_ENABLE_TELEMETRY = "0"

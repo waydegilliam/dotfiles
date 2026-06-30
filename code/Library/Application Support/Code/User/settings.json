@@ -192,7 +192,9 @@
 	"git.ignoreRebaseWarning": true,
 	"git.detectWorktrees": true,
 	"chat.disableAIFeatures": true,
+	"telemetry.telemetryLevel": "off",
 	"scm.repositories.selectionMode": "single",
 	"scm.defaultViewMode": "tree",
-	"workbench.activityBar.location": "top"
+	"workbench.activityBar.location": "top",
+	"update.showReleaseNotes": false
 }
