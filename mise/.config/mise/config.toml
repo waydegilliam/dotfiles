@@ -30,3 +30,7 @@ yarn = "4.12.0"
 [settings]
 experimental = true
 python.uv_venv_auto = true
+
+[env]
+SBX_NO_TELEMETRY = 1  # Disable Docker sandbox telemetry
+

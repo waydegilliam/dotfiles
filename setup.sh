@@ -32,6 +32,7 @@ DOTFILES_DESKTOP=(
 
 BREW_PACKAGES=(
   docker
+  docker/tap/sbx
   fish
   fisher
   htop
@@ -44,6 +45,10 @@ BREW_PACKAGES=(
   universal-ctags
 )
 
+BREW_TAPS=(
+  docker/tap
+)
+
 BREW_CASKS=(
   alt-tab
   monitorcontrol
@@ -53,6 +58,7 @@ BREW_CASKS=(
 
 APT_PACKAGES=(
   build-essential
+  docker-sbx
   git
   htop
   lua5.4
@@ -102,6 +108,11 @@ if is_macos; then
 
   # Update Homebrew
   brew update
+
+  # Trust taps
+  for tap in "${BREW_TAPS[@]}"; do
+    brew trust "$tap"
+  done
 
   # Install packages
   brew install --quiet "${BREW_PACKAGES[@]}"
