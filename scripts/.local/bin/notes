@@ -1,0 +1,84 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+usage() {
+    cat <<'EOF'
+Usage: notes [command]
+
+Commands:
+  open      Open Apple Notes (default)
+  import    Import Markdown from stdin, or the clipboard when run interactively
+  help      Show this help
+
+Examples:
+  notes import
+  cat note.md | notes import
+  notes import < note.md
+EOF
+}
+
+require_command() {
+    if ! command -v "$1" >/dev/null 2>&1; then
+        echo "notes: required command not found: $1" >&2
+        exit 1
+    fi
+}
+
+import_markdown() {
+    require_command pandoc
+    require_command osascript
+
+    html_file="$(mktemp "${TMPDIR:-/tmp}/mdnote.XXXXXX")"
+    trap 'rm -f "$html_file"' EXIT
+
+    if [[ -t 0 ]]; then
+        require_command pbpaste
+        pbpaste | pandoc --from=gfm --to=html >"$html_file"
+    else
+        pandoc --from=gfm --to=html >"$html_file"
+    fi
+
+    osascript - "$html_file" <<'APPLESCRIPT'
+on run argv
+    set htmlBody to read (POSIX file (item 1 of argv)) as «class utf8»
+
+    tell application "Notes"
+        set notesAccount to default account
+
+        if not (exists folder "Imported Notes" of notesAccount) then
+            set destinationFolder to make new folder at notesAccount ¬
+                with properties {name:"Imported Notes"}
+        else
+            set destinationFolder to folder "Imported Notes" of notesAccount
+        end if
+
+        set newNote to make new note at destinationFolder ¬
+            with properties {body:htmlBody}
+
+        activate
+        delay 0.2
+        open note location ("notes://showNote?identifier=" & (id of newNote))
+    end tell
+end run
+APPLESCRIPT
+}
+
+command="${1:-open}"
+
+case "$command" in
+    open)
+        open -a Notes
+        ;;
+    import)
+        import_markdown
+        ;;
+    help | -h | --help)
+        usage
+        ;;
+    *)
+        echo "notes: unknown command: $command" >&2
+        usage >&2
+        exit 2
+        ;;
+esac
