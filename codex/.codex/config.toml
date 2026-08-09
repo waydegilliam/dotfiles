@@ -9,9 +9,3 @@ steer = true
 multi_agent = true
 hooks = true
 goals = true
-
-[mcp_servers.attio]
-url = "https://mcp.attio.com/mcp"
-
-[mcp_servers.granola]
-url = "https://mcp.granola.ai/mcp"

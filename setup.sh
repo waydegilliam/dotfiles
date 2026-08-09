@@ -221,9 +221,6 @@ else
   exit 1
 fi
 
-# Install Claude Code
-curl -fsSL https://claude.ai/install.sh | bash
-
 # Silence Unix login message
 if is_macos; then
   touch ~/.hushlogin
