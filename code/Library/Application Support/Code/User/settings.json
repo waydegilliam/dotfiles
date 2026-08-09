@@ -155,7 +155,7 @@
 			"source.fixAll": "explicit",
 			"source.organizeImports": "explicit"
 		},
-		"diffEditor.ignoreTrimWhitespace": true
+		"diffEditor.ignoreTrimWhitespace": false
 	},
 	"[shellscript]": {
 		"files.eol": "\n",
@@ -196,5 +196,9 @@
 	"scm.repositories.selectionMode": "single",
 	"scm.defaultViewMode": "tree",
 	"workbench.activityBar.location": "top",
-	"update.showReleaseNotes": false
+	"update.showReleaseNotes": false,
+	"azureTerraform.survey": {
+		"surveyPromptDate": "never",
+		"surveyPromptIgnoredCount": 0
+	}
 }
