@@ -1,16 +1,18 @@
 function kpop --description "Kill process on port"
-    set -l port
+    set -l ports
 
     if test (count $argv) -gt 0
-        set port $argv[1]
+        set ports $argv
     else if not isatty stdin
-        read port
+        read ports
     end
 
-    if test -z "$port"
+    if test (count $ports) -eq 0
         echo "Usage: kpop <port>"
         return 1
     end
 
-    lsof -t -i :$port | xargs kill
+    for port in $ports
+        lsof -t -i :$port | xargs kill
+    end
 end
