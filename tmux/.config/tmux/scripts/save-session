@@ -1,0 +1,40 @@
+#!/usr/bin/env bash
+
+save_script="$HOME/.tmux/plugins/tmux-resurrect/scripts/save.sh"
+status_option="@session-save-status"
+show_status=true
+
+if [[ "${1:-}" == "quiet" ]]; then
+  show_status=false
+fi
+
+clear_status() {
+  if ! $show_status; then
+    return
+  fi
+
+  tmux set-option -gq "$status_option" ""
+  tmux refresh-client -S
+}
+
+trap clear_status EXIT
+
+if $show_status; then
+  tmux set-option -gq "$status_option" "SAVING"
+  tmux refresh-client -S
+fi
+
+if "$save_script" quiet; then
+  if $show_status; then
+    tmux set-option -gq "$status_option" "SAVED"
+    tmux refresh-client -S
+    sleep 2
+  fi
+else
+  if $show_status; then
+    tmux set-option -gq "$status_option" "SAVE FAILED"
+    tmux refresh-client -S
+    sleep 3
+  fi
+  exit 1
+fi

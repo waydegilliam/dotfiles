@@ -98,6 +98,17 @@ is_desktop() {
   return 1
 }
 
+install_git_repo() {
+  local repo_url="$1"
+  local commit="$2"
+  local install_dir="$3"
+
+  [[ -e "$install_dir" ]] && return
+
+  git clone --no-checkout "$repo_url" "$install_dir" &&
+    git -C "$install_dir" checkout --detach "$commit"
+}
+
 # Install packages
 if is_macos; then
   DOTFILES=("${DOTFILES_SERVER[@]}" "${DOTFILES_DESKTOP[@]}")
@@ -155,6 +166,18 @@ if is_linux; then
     echo "Skipping Docker install (no docker packages in apt sources)"
   fi
 fi
+
+# Install tmux plugins
+TMUX_PLUGINS_DIR="$HOME/.tmux/plugins"
+mkdir -p "$TMUX_PLUGINS_DIR"
+install_git_repo \
+  https://github.com/tmux-plugins/tmux-resurrect.git \
+  cff343cf9e81983d3da0c8562b01616f12e8d548 \
+  "$TMUX_PLUGINS_DIR/tmux-resurrect"
+install_git_repo \
+  https://github.com/tmux-plugins/tmux-continuum.git \
+  0698e8f4b17d6454c71bf5212895ec055c578da0 \
+  "$TMUX_PLUGINS_DIR/tmux-continuum"
 
 # Install Mise
 if ! command -v mise &> /dev/null; then
