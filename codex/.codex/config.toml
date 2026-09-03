@@ -1,5 +1,4 @@
-model = "gpt-5.5"
-model_reasoning_effort = "xhigh"
+check_for_update_on_startup = false
 
 [tui]
 vim_mode_default = true
@@ -7,5 +6,6 @@ vim_mode_default = true
 [features]
 steer = true
 multi_agent = true
-hooks = true
 goals = true
+hooks = true
+browser_use_full_cdp_access = true

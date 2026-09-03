@@ -24,8 +24,7 @@ rust-analyzer = "2025-12-15"
 stylua = "2.3.1"
 temporal = "1.29.1"
 yarn = "4.12.0"
-"github:PrimeIntellect-ai/prime-agent" = { version = "0.7.1", bin_path = "package/dist/bundle", rename_exe = "prime-agent", postinstall = 'cd "$MISE_TOOL_INSTALL_PATH/package" && npm i' }
-"npm:@openai/codex" = "0.147.0"
+"npm:@openai/codex" = "0.152.1"
 
 [settings]
 experimental = true
