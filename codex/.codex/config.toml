@@ -1,11 +1,1 @@
-check_for_update_on_startup = false
-
-[tui]
-vim_mode_default = true
-
-[features]
-steer = true
-multi_agent = true
-goals = true
-hooks = true
-browser_use_full_cdp_access = true
+../.config/codex/config.toml

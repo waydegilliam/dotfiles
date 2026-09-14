@@ -1,10 +1,1 @@
-[
-  {
-    "command": "focusBrowserAddressBar",
-    "key": null
-  },
-  {
-    "command": "toggleSidePanel",
-    "key": "Command+L"
-  }
-]
+../.config/codex/keybindings.json

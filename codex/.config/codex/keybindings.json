@@ -1,0 +1,10 @@
+[
+  {
+    "command": "focusBrowserAddressBar",
+    "key": null
+  },
+  {
+    "command": "toggleSidePanel",
+    "key": "Command+L"
+  }
+]

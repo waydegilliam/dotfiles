@@ -1,23 +1,18 @@
 # Dotfiles
 
-My personal dotfiles.
+Personal dotfiles for macOS and Ubuntu.
 
 ## Setup
 
-- [Ghostty](https://ghostty.org/) (terminal emulator)
+Keep the checkout in its final location, then run:
 
-## On a new machine
+```sh
+./setup.sh              # Install packages and link dotfiles
+./setup.sh --dry-run    # Preview links without changes
+./setup.sh --stow-only  # Link dotfiles without installing tools
+```
 
-Step through the
-[MacOS](https://github.com/waydegg/dotfiles-public/blob/master/macos-setup.sh) or
-[Ubuntu](https://github.com/waydegg/dotfiles-public/blob/master/ubuntu-setup.sh) setup
-scripts line-by-line depending on what OS you're on.
+Stow packages mirror paths under `~`: `fish/.config/fish` links to `~/.config/fish`.
+Stow individual packages, not the whole checkout (`stow -t "$HOME" .`).
 
-I update these scripts to work on my local machines (M1 macs running some version of
-Ventura and linux boxes running Ubuntu 22.04) and virtual private servers (running
-Ubuntu 22.04), so depending on your OS version or hardware you may run accross issues
-running all of these commands successfully.
-
-Run `:PlugInstall` and `:LspInstall` when opening NeoVim for the first time. It will
-complain about missing plugins and language servers, so you will have to restart it a
-couple times after installing everything.
+Codex config lives in `~/.config/codex`, with compatibility links in `~/.codex`.

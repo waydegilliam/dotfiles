@@ -1,0 +1,19 @@
+check_for_update_on_startup = false
+model = "gpt-6-astra"
+model_reasoning_effort = "xhigh"
+
+[tui]
+vim_mode_default = true
+
+[tui.model_availability_nux]
+gpt-6-astra = 1
+
+[features]
+steer = true
+multi_agent = true
+goals = true
+hooks = true
+browser_use_full_cdp_access = true
+
+[projects."/home/waydegilliam/ghq/github.com/waydegilliam/dotfiles"]
+trust_level = "trusted"

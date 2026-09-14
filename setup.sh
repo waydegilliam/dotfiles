@@ -2,13 +2,29 @@
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 
+STOW_ONLY=0
+STOW_DRY_RUN=0
+for arg in "$@"; do
+  case "$arg" in
+    --stow-only) STOW_ONLY=1 ;;
+    --dry-run) STOW_ONLY=1; STOW_DRY_RUN=1 ;;
+    -h|--help)
+      echo "Usage: $0 [--stow-only | --dry-run]"
+      echo "  --stow-only  Link dotfiles without installing packages, tools, or plugins."
+      echo "  --dry-run    Preview dotfile links without changing anything."
+      exit 0
+      ;;
+    *) echo "Unknown option: $arg" >&2; exit 1 ;;
+  esac
+done
+
 DOTFILES_SERVER=(
   bash
   bat
   codex
-  claude
   eza
   fish
+  gh
   git
   glow
   ipython
@@ -109,9 +125,54 @@ install_git_repo() {
     git -C "$install_dir" checkout --detach "$commit"
 }
 
+stow_dotfiles() {
+  local pkg
+  local stow_args=(--verbose)
+  local failed_packages=()
+
+  if ! command -v stow &> /dev/null; then
+    echo "GNU Stow is required to link dotfiles." >&2
+    return 1
+  fi
+
+  if [[ "${STOW_ADOPT:-0}" == "1" ]]; then
+    stow_args+=(--adopt)
+  fi
+  if [[ "$STOW_DRY_RUN" == "1" ]]; then
+    stow_args+=(--simulate)
+  fi
+
+  for pkg in "${DOTFILES[@]}"; do
+    if [[ ! -d "$SCRIPT_DIR/$pkg" ]]; then
+      echo "Missing stow package: $pkg" >&2
+      failed_packages+=("$pkg")
+      continue
+    fi
+
+    if ! stow --dir "$SCRIPT_DIR" --target "$HOME" "${stow_args[@]}" "$pkg"; then
+      failed_packages+=("$pkg")
+    fi
+  done
+
+  if ((${#failed_packages[@]})); then
+    echo "Failed to stow: ${failed_packages[*]}" >&2
+    echo "Resolve the conflicts above, then rerun $0 --stow-only." >&2
+    return 1
+  fi
+}
+
+DOTFILES=("${DOTFILES_SERVER[@]}")
+if is_desktop; then
+  DOTFILES+=("${DOTFILES_DESKTOP[@]}")
+fi
+
+if [[ "$STOW_ONLY" == "1" ]]; then
+  stow_dotfiles
+  exit $?
+fi
+
 # Install packages
 if is_macos; then
-  DOTFILES=("${DOTFILES_SERVER[@]}" "${DOTFILES_DESKTOP[@]}")
   # Install Homebrew if not installed
   if ! command -v brew &> /dev/null; then
     /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
@@ -133,10 +194,6 @@ if is_macos; then
 fi
 
 if is_linux; then
-  DOTFILES=("${DOTFILES_SERVER[@]}")
-  if is_desktop; then
-    DOTFILES+=("${DOTFILES_DESKTOP[@]}")
-  fi
   sudo apt update
   sudo apt install -y ca-certificates curl gnupg lsb-release software-properties-common
 
@@ -202,22 +259,8 @@ else
   exit 1
 fi
 
-# Stow dotfiles, optionally adopting existing files and backing up fish config.
-stow_args=()
-if [[ "${STOW_ADOPT:-0}" == "1" ]]; then
-  stow_args+=(--adopt)
-fi
-
-for pkg in "${DOTFILES[@]}"; do
-  if [[ ! -d "$SCRIPT_DIR/$pkg" ]]; then
-    echo "Skipping stow package $pkg (directory missing)"
-    continue
-  fi
-
-  if ! stow --dir "$SCRIPT_DIR" --target "$HOME" "${stow_args[@]}" "$pkg"; then
-    echo "Skipping stow package $pkg (conflicts or errors)"
-  fi
-done
+# Stow dotfiles before installing tools that depend on their configuration.
+stow_dotfiles || exit 1
 
 # Install Mise tools
 export MISE_CONFIG_FILE="$SCRIPT_DIR/mise/.config/mise/config.toml"
