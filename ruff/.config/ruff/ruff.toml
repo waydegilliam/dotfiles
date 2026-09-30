@@ -2,14 +2,36 @@ line-length = 120
 
 [lint]
 select = [
-  "E",      # pycodestyle errors
-  "W",      # pycodestyle warnings
-  "I",      # isort
-  "F",      # pyflakes
-  "B",      # flake8-bugbear
-  "C4",     # flake8-comprehensions
-  "RUF021", # parenthesize chained operators
-  "RUF022", # sort __all__
-  "RUF023", # sort __slots__
+  "D",       # pydocstyle
+  "E",       # pycodestyle errors
+  "W",       # pycodestyle warnings
+  "I",       # isort
+  "F",       # pyflakes
+  "B",       # flake8-bugbear
+  "C4",      # flake8-comprehensions
+  "T20",     # flake8-print
+  "TID251",  # ban specific modules and members
+  "RUF021",  # parenthesize chained operators
+  "RUF022",  # sort __all__
+  "RUF023",  # sort __slots__
+  "TID252",  # disallow relative imports outside the current package
+  "PLW0603", # disallow global statements
+  "E402",    # disallow module imports outside the top of the file
+  "PLC0415", # disallow imports outside top-level scope
+  "S101",    # disallow assert statements
+  "SIM117",  # combine nested context managers
+  "RET504",  # unnecessary assignment before return
 ]
-ignore = ["E712"]
+ignore = [
+  "D1", # ignore all missing-docstring rules so checks only apply to existing docstrings
+]
+extend-safe-fixes = ["SIM117"]
+
+[lint.pydocstyle]
+convention = "google"
+
+[lint.isort]
+split-on-trailing-comma = false
+
+[lint.flake8-bugbear]
+extend-immutable-calls = ["fastapi.Depends", "fastapi.Header", "fastapi.Form", "fastapi.Query"]
