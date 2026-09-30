@@ -8,13 +8,13 @@ structure and naming rules.
 Keep each entity's code together, for example under `entity/<name>/`, so it is easy to find and change. Use file names
 that fit the language and project. Split these parts into separate files only when it helps.
 
-| Part | What belongs here |
-| --- | --- |
-| Models and schemas | Stored fields, links to other records, data rules, and input and output types. |
-| Services | Read and write data, apply business rules, and reuse existing data helpers. |
-| Setup and access checks | Set up services, load records, and check who can use them. |
-| Routes or controllers | Read requests, call services, and return responses or HTTP errors. |
-| Query helpers | Share complex database queries. Keep simple queries in the service. |
+| Part                    | What belongs here                                                              |
+| ----------------------- | ------------------------------------------------------------------------------ |
+| Models and schemas      | Stored fields, links to other records, data rules, and input and output types. |
+| Services                | Read and write data, apply business rules, and reuse existing data helpers.    |
+| Setup and access checks | Set up services, load records, and check who can use them.                     |
+| Routes or controllers   | Read requests, call services, and return responses or HTTP errors.             |
+| Query helpers           | Share complex database queries. Keep simple queries in the service.            |
 
 Keep shared database setup, authentication, and common types and helpers outside entity folders. Add only the parts
 an entity needs. An internal entity may need models and services without API routes.
@@ -40,110 +40,95 @@ an entity needs. An internal entity may need models and services without API rou
 - For example, count a collection's stored documents instead of saving a separate document count, if those records
   include every document the count should cover.
 
-## File Structure Example: Argos Matters
+## File Structure Example: Document Management
 
-In Argos, a matter brings together owners, source files and messages, activity, and access rules. The example below
-shows its Python files. The same roles apply in other languages; use the names and tools that fit the backend.
-Only the relevant parts of `argos-api` are shown.
+This Python example manages documents, their file revisions, and imports from external systems. A `file` is the
+document's stable identity, with a title, owner, and access rules. A `file_revision` represents one content version,
+with a storage reference, checksum, and processing status. Only selected files are shown; use the names and tools
+that fit the backend.
 
 ```text
-argos-api/src/argos_api/
+backend/src/app/
 ├── main.py
 ├── auth/
 ├── database/
-├── dependencies.py
-├── models.py
-├── service.py
-├── audited_service.py
-├── entity/
-│   ├── matter/
-│   │   ├── models.py
-│   │   ├── service.py
-│   │   ├── routes.py
-│   │   ├── dependencies.py
-│   │   ├── permissions.py
-│   │   ├── queries.py
-│   │   ├── source_registry.py
-│   │   ├── source_inputs.py
-│   │   ├── source_mutation.py
-│   │   ├── namespace.py
-│   │   ├── namespace_v2.py
-│   │   ├── initial_product_review_workflow.py
-│   │   ├── sales_contract_review_workflow.py
-│   │   ├── termination_workflow.py
-│   │   ├── workflow_intake_document.py
-│   │   └── utils.py
-│   ├── matter_access/
-│   ├── matter_activity/
-│   ├── matter_comment/
-│   ├── matter_custom_field/
-│   └── matter_queue_item/
-└── worker/workflows/
-    ├── matter_mutate/
-    └── matter_index/
+├── clients/
+│   ├── aws.py
+│   ├── google_drive.py
+│   ├── sharepoint.py
+│   └── turbopuffer.py
+└── entity/
+    ├── file/
+    │   ├── models.py
+    │   ├── service.py
+    │   ├── routes.py
+    │   └── dependencies.py
+    ├── file_revision/
+    │   ├── models.py
+    │   ├── service.py
+    │   ├── routes.py
+    │   └── dependencies.py
+    ├── integration/
+    │   ├── models.py
+    │   └── service.py
+    ├── drive_connection/
+    │   ├── models.py
+    │   ├── service.py
+    │   └── routes.py
+    └── sharepoint_connection/
+        ├── models.py
+        ├── service.py
+        └── routes.py
 ```
 
-### Shared Code
+### Entities and API Routes
 
-- `main.py` registers the entity routes with the app.
-- `auth/` handles shared authentication and permissions. `database/` sets up database access.
-- The top-level `dependencies.py` supplies database sessions and the background-work client to request handlers.
-- The top-level `models.py`, `service.py`, and `audited_service.py` provide common types, database operations, and
-  audit logging. Entities reuse them so they handle common work in the same way.
-- Related entities have their own folders. For example, `matter_comment/` owns comment code and `matter_access/`
-  owns matter access checks. The matter routes include several of these related routes under `/matters`.
-- `worker/workflows/` runs background work, such as processing matter sources and updating the search index.
+`main.py` registers the API routes. Shared authentication and database setup live in `auth/` and `database/`.
 
-### Main Matter Modules
+| Area                     | Responsibility                                                                                                                                                |
+| ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `file/`                  | Owns document metadata, access rules, and the current revision reference. Exposes `/files` endpoints.                                                         |
+| `file_revision/`         | Owns version history, stored content references, and processing state. Exposes `/files/{file_id}/revisions` endpoints.                                        |
+| `integration/`           | Owns shared integration identity, organization ownership, and external document mappings. Reuses file and revision services when importing changes.           |
+| `drive_connection/`      | Owns Google Drive connection settings, credential references, selected drives or folders, and sync cursors. Exposes connection setup and sync routes.         |
+| `sharepoint_connection/` | Owns SharePoint connection settings, credential references, selected sites or document libraries, and sync cursors. Exposes connection setup and sync routes. |
 
-These files all live in `entity/matter/`.
+Each provider connection belongs to an integration. Its service handles provider-specific setup and sync state,
+then passes imported documents to the shared integration service for file and revision creation.
 
-| Module | What it does | Why it is separate |
-| --- | --- | --- |
-| `models.py` | Defines the stored `Matter`, its source links, and input and output types. `MatterCreate` and `MatterUpdate` are service inputs; `MatterCreateRequestData` and `MatterUpdateRequestData` are client inputs; `MatterPublic` is a response type. | Keeps data definitions together while separating what the database stores from what clients can send or see. |
-| `service.py` | Defines `MatterService`: creates and updates matters, links sources, lists records, and calculates access levels. Closing a matter sets its close time; deleting one also marks its action items as deleted. | Gives routes and background jobs a shared place for matter operations and rules. |
-| `routes.py` | Defines `/matters` endpoints for creating, listing, reading, changing, and deleting matters, plus source and queue actions. Calls services and starts background work. | Keeps request handling, HTTP responses, and the steps for each API action together. |
-| `dependencies.py` | Builds `MatterService` with a database session and audit context. Loads matters, rejects deleted or wrong-organization records, and prepares list filters. | Reuses setup and record checks across endpoints. |
-| `permissions.py` | Defines the rule for who can change a matter's owner. Routes also use it when changing privileged status. | Keeps that decision in a small function that is easy to read and reuse. |
-| `queries.py` | Builds shared database queries for matter links, access checks, topics, and source counts. | Keeps complex queries reusable and out of request handlers. |
+Within each entity, `models.py` separates stored records, service inputs, request inputs, and public responses.
+`service.py` owns data operations and business rules. `routes.py` handles HTTP requests and responses, while
+`dependencies.py` builds services, loads records, and checks access. Revision access follows the parent file's rules;
+loading a revision also checks that it belongs to the requested file.
 
-### Source Modules
+Keep a revision's original content unchanged; new content creates a new revision. Processing status and derived
+outputs, such as extracted text and previews, can change independently. Allocate revision numbers atomically and
+enforce uniqueness per file so concurrent uploads cannot create conflicting versions.
 
-A source is a file, message, or other record used to build a matter.
+### Client Integrations
 
-| Module | What it does | Why it is separate |
-| --- | --- | --- |
-| `source_registry.py` | Maps each source kind to its model, link table, document kind, and display label. | Gives source-handling code one place to find these mappings. |
-| `source_inputs.py` | Turns uploads, existing source IDs, and selected external files into inputs for background processing. Checks external connections and saves uploads. | Lets create and source-edit routes share the same input handling. |
-| `source_mutation.py` | Checks source removals, prevents removing the last source without adding another, and cleans up file links and activity citations. | Keeps source-removal rules and cleanup together. |
+- `clients/aws.py` wraps [Amazon S3](https://docs.aws.amazon.com/AmazonS3/latest/userguide/Welcome.html) operations
+  for storing and retrieving file content, previews, and extracted text.
+- `clients/google_drive.py` wraps the [Google Drive API](https://developers.google.com/workspace/drive/api/guides/about-sdk)
+  for listing and downloading files. Its connection entity owns which drives and folders to sync.
+- `clients/sharepoint.py` wraps [Microsoft Graph](https://learn.microsoft.com/en-us/graph/api/resources/sharepoint)
+  operations for SharePoint sites, document libraries, and files. Its connection entity owns which sources to sync.
+- `clients/turbopuffer.py` writes document text, vectors, and metadata to [turbopuffer](https://turbopuffer.com/docs)
+  and runs search queries. Entity services define indexed fields and access filters.
 
-### Search, Special Flows, and Helpers
+Keep clients focused on provider operations. Entity services own application rules, such as which account can import
+a document. Track imported versions by connection, external document ID, and external version ID so repeated syncs
+do not create duplicate revisions.
 
-| Module | What it does | Why it is separate |
-| --- | --- | --- |
-| `namespace.py` | Defines matter fields and filters for a search index, including text and access fields. | Keeps the search data layout separate from the database model. |
-| `namespace_v2.py` | Defines the V2 search index fields, including vectors used for similarity search. | Gives that index version its own definition. |
-| `initial_product_review_workflow.py` | Accepts product-review intake data and files, creates a queued matter, and starts processing. | Keeps this special create flow out of the general matter routes. |
-| `sales_contract_review_workflow.py` | Accepts sales-contract intake data and files. Starts a selected contract-review workflow when provided with attachments, or starts general matter processing. | Keeps contract-specific choices and setup together. |
-| `termination_workflow.py` | Accepts employment-termination intake data and files, creates a queued matter, and starts processing. | Keeps this special create flow in one place. |
-| `workflow_intake_document.py` | Turns the intake data for those three flows into Word documents. | Keeps document formatting out of request handling. |
-| `utils.py` | Converts source references, finds source messages, and updates stored workflow status to match the background job. | Shares small matter-specific helpers across callers. |
+### Example: Adding a File Revision
 
-The three special `*_workflow.py` files above define API routes that start work. The background jobs they start live
-under `worker/workflows/`. A simpler entity may need only models, a service, and routes.
+For `POST /files/{file_id}/revisions`:
 
-### Example: Updating a Matter
+1. The route accepts `FileRevisionCreateRequestData` referring to a completed upload. Dependencies check file edit
+   access and verify that the upload belongs to the current organization.
+2. The route builds `FileRevisionCreate` and calls `FileRevisionService.create`. The service creates a pending
+   revision and records its processing request in the same transaction.
+3. The API returns `FileRevisionPublic` with processing status without waiting for extraction and indexing.
 
-For `PATCH /matters/{matter_public_id}`:
-
-1. The route accepts `MatterUpdateRequestData`. Dependencies load the matter and check the user's organization and
-   edit access.
-2. The route checks owner-change rules in `permissions.py` when needed. It resolves an owner's public ID to an
-   internal ID and keeps only the fields the caller sent.
-3. The route builds `MatterUpdate` and calls `MatterService.update`. The service applies matter rules, saves the
-   changes, and uses the shared audit service to record them.
-4. If ownership or privileged status changed, the route updates search access fields. It starts a search-index update
-   for a matter that has not been deleted, then returns `MatterPublic`.
-
-This split gives each part a clear job: models define the data, dependencies load it, services change it, and routes
-handle the HTTP request and response.
+External imports use the same revision creation and processing path. Add other modules, such as shared query helpers
+or separate permission rules, only when the entity needs them.

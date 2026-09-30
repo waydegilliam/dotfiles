@@ -22,6 +22,19 @@ hooks = true
 browser_use_full_cdp_access = true
 fast_mode = true
 
+[[hooks.Stop]]
+[[hooks.Stop.hooks]]
+type = "command"
+command = 'uv run --no-project --script "$HOME/.codex/hooks/quality.py"'
+timeout = 300
+statusMessage = "Checking code quality"
+
+[hooks.state]
+
+[hooks.state."/Users/waydegilliam/.codex/default.config.toml:stop:0:0"]
+trusted_hash = "sha256:250eae9bd83aca55bf2f5c439fc4b127d14509a316819216a7fe183b64ed4b02"
+enabled = true
+
 [memories]
 generate_memories = false
 use_memories = false
