@@ -32,6 +32,7 @@ DOTFILES_SERVER=(
   mise
   npm
   nvim
+  pnpm
   prettier
   ruff
   scripts
