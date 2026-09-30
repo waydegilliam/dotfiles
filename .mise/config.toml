@@ -1,7 +1,0 @@
-[tools]
-prettier = "3.7.4"
-taplo = "0.10.0"
-
-[tasks.format]
-run = "prettier --write . && taplo format"
-description = "Format files with prettier and taplo"
