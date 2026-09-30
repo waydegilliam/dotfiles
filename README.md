@@ -14,5 +14,3 @@ Keep the checkout in its final location, then run:
 
 Stow packages mirror paths under `~`: `fish/.config/fish` links to `~/.config/fish`.
 Stow individual packages, not the whole checkout (`stow -t "$HOME" .`).
-
-Codex config lives in `~/.config/codex`, with compatibility links in `~/.codex`.

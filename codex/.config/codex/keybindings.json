@@ -1,10 +1,14 @@
 [
-  {
-    "command": "focusBrowserAddressBar",
-    "key": null
-  },
-  {
-    "command": "toggleSidePanel",
-    "key": "Command+L"
-  }
+	{
+		"command": "focusBrowserAddressBar",
+		"key": null
+	},
+	{
+		"command": "toggleSidebar",
+		"key": "Command+B"
+	},
+	{
+		"command": "toggleSidePanel",
+		"key": "Command+L"
+	}
 ]

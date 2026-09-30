@@ -94,6 +94,10 @@ set -gx FZF_DEFAULT_COMMAND 'fd --type f --hidden \
   --exclude .cache'
 
 
+# ===== Abbreviations ==========================================================
+abbr --add cx 'codex --profile default'
+
+
 # ===== Aliases ================================================================
 alias ls "ls -p -G"
 alias la "ls -A"
@@ -179,4 +183,3 @@ mise activate fish | source
 
 # aws
 set -x AWS_PAGER "bat -l man -p"
-

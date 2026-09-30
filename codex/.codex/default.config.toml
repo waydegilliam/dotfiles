@@ -1,0 +1,28 @@
+approval_policy = "never"
+approvals_reviewer = "user"
+check_for_update_on_startup = false
+model = "gpt-6-astra"
+model_reasoning_effort = "xhigh"
+personality = "pragmatic"
+plan_mode_reasoning_effort = "xhigh"
+sandbox_mode = "danger-full-access"
+service_tier = "priority"
+
+[tui]
+vim_mode_default = true
+
+[tui.model_availability_nux]
+gpt-6-astra = 2
+
+[features]
+steer = true
+multi_agent = true
+goals = true
+hooks = true
+browser_use_full_cdp_access = true
+fast_mode = true
+
+[memories]
+generate_memories = false
+use_memories = false
+disable_on_external_context = false
