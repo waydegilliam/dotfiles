@@ -1,0 +1,4 @@
+interface:
+  display_name: "Coding Standards"
+  short_description: "Apply coding standards to projects and standalone files"
+  default_prompt: "Use $coding-standards to implement this change following the coding standards and applicable local conventions."
