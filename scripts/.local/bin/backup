@@ -131,7 +131,7 @@ def load_config(path: Path) -> Config:
         with path.open("rb") as handle:
             values = tomllib.load(handle)
     except FileNotFoundError as error:
-        raise BackupError(f"Missing config: {path}. See the backup example in the dotfiles README.") from error
+        raise BackupError(f"Missing config: {path}. Run 'backup --help' for setup and a config example.") from error
     except tomllib.TOMLDecodeError as error:
         raise BackupError(f"Invalid TOML in {path}: {error}") from error
     if set(values) - {"drive", "icloud", "sftp", "staging_dir", "rclone_config"}:
@@ -438,7 +438,7 @@ async def wait_for_icloud(runner: Runner, location: str, size: int, task: TaskID
             )
         except TimeoutError as error:
             raise BackupError(
-                "iCloud status check timed out; check the homeserver's SSH connection and authentication."
+                "iCloud status check timed out; check the server's SSH connection and authentication."
             ) from error
         if result.code == 0:
             try:
@@ -587,35 +587,61 @@ def render_results(results: list[DestinationResult]) -> None:
             console.print(f"{result.name}: {result.error}", style="red", markup=False)
 
 
-@click.command(context_settings={"help_option_names": ["-h", "--help"]})
-@click.option("--folder", "-f", required=True, help="Named backup folder, such as project/component.")
+@click.command(no_args_is_help=True, context_settings={"help_option_names": ["-h", "--help"]})
+@click.option("--folder", "-f", required=True, help="Relative folder under each destination, e.g. project/component.")
 @click.option(
     "--config",
     "config_path",
     type=click.Path(path_type=Path),
     envvar="BACKUP_CONFIG",
     default=lambda: Path(os.environ.get("XDG_CONFIG_HOME", str(Path.home() / ".config"))) / "backup/config.toml",
-    show_default="~/.config/backup/config.toml",
+    show_default="$XDG_CONFIG_HOME/backup/config.toml or ~/.config/backup/config.toml",
     show_envvar=True,
     help="Private TOML configuration with drive, icloud, and sftp sections.",
 )
 @click.option("--dry-run", is_flag=True, help="Inspect and report without creating archives or uploading.")
 @click.argument("source", type=click.Path(path_type=Path))
 def main(folder: str, config_path: Path, dry_run: bool, source: Path) -> None:
-    """Back up SOURCE to --folder on all three destinations. Put options before SOURCE.
+    """Back up one file or folder to Drive, iCloud, and an SSH server.
 
-    Example: backup --folder project/component ./exports
+    \b
+    Examples (options before SOURCE):
+      backup --folder project/component ./exports
+      backup --folder project --dry-run ./database.sql
 
-    Destinations are read from the private config's [drive], [icloud], and
-    [sftp] sections. Use --config or BACKUP_CONFIG to select another file.
+    Setup: install uv, rclone, and OpenSSH. Configure cloud crypt remotes
+    privately; keep credentials and recovery keys outside Git. iCloud's local
+    crypt remote must wrap native iCloud Drive. The SSH server needs a matching
+    direct-iCloud crypt remote (same keys and root) and passwordless SSH.
 
-    Each run creates a full dated .tar.gz archive and verifies its SHA-256 by
-    downloading it. A matching .manifest.json marks successful verification.
-    Old backups are retained. Files must remain unchanged while archiving;
-    use database exports instead of live database files. Standard tar metadata
-    and symlinks are preserved; macOS ACLs and extended attributes are not.
-    iCloud verification runs through the configured homeserver SSH connection.
-    """
+    Save this example to the config path below; chmod 600 the file:
+
+    \b
+    [drive]
+    remote = "drive-encrypted:"
+    [icloud]
+    remote = "icloud-local-encrypted:"
+    verify_host = "backup-host"
+    verify_remote = "icloud-encrypted:"
+    [sftp]
+    remote = "home:Backups/computer"
+
+    Optional top-level staging_dir and rclone_config go before the sections.
+    Staging defaults to system temp and must be outside SOURCE. Under [icloud],
+    drive_dir defaults to ~/Library/Mobile Documents/com~apple~CloudDocs and
+    upload_timeout_seconds to 3600. --config overrides BACKUP_CONFIG.
+
+    Each run previews, asks for confirmation, and adds a dated .tar.gz; old
+    backups remain. Read-back SHA-256 verification publishes a .manifest.json;
+    no manifest means incomplete/unverified. iCloud waits for server visibility.
+    Failure exits nonzero and retains staging; other destinations continue.
+    Logs: $XDG_STATE_HOME/backup (default ~/.local/state/backup).
+
+    Keep files unchanged while archiving; export live databases first. Tar
+    metadata and symlinks are preserved; macOS ACLs/resource forks/xattrs aren't.
+    Restore: download via rclone, compare SHA-256 with the manifest, then extract
+    into a separate directory.
+    """  # noqa: D301 -- Click uses backspace escapes to preserve example formatting.
     os.umask(0o077)
     workspace = None
     success = False
