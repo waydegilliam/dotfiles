@@ -53,20 +53,17 @@ function M.setup()
 	vim.wo.cursorline = false
 
 	M.render()
-
-	vim.api.nvim_create_autocmd("BufEnter", {
-		once = true,
-		callback = function()
-			M.restore_options()
-		end,
-	})
 end
 
 function M.restore_options()
-	if startup_buf and vim.api.nvim_get_current_buf() ~= startup_buf then
-		vim.wo.number = true
-		vim.wo.signcolumn = "yes"
-		vim.wo.cursorline = true
+	if not startup_buf or vim.api.nvim_get_current_buf() == startup_buf or vim.bo.buftype ~= "" then
+		return
+	end
+
+	vim.wo.number = true
+	vim.wo.signcolumn = "yes"
+	vim.wo.cursorline = true
+	if not vim.api.nvim_buf_is_valid(startup_buf) then
 		startup_buf = nil
 	end
 end
