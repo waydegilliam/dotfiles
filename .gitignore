@@ -1,6 +1,8 @@
 .DS_Store
 .swp
 venv
+.venv/
+__pycache__/
 
 # GitHub CLI login credentials
 gh/.config/gh/hosts.yml

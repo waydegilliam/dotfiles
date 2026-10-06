@@ -112,6 +112,7 @@ def run_git(cwd: Path, *args: str, input_text: str | None = None) -> subprocess.
     )
 
 
+@cache
 def get_repository(cwd: Path) -> Path | None:
     try:
         result = run_git(cwd, "rev-parse", "--show-toplevel")
@@ -222,6 +223,9 @@ def run_command(command: QualityCommand, cwd: Path, deadline: float) -> str | No
         return "Quality hook execution deadline exceeded."
     args = [*command.args, "--", *(str(path) for path in command.paths)]
     label = f"$ {shlex.join(command.args)}"
+    environment = {**os.environ, "NO_COLOR": "1", "UV_NO_PROGRESS": "1"}
+    if (cwd / ".venv/pyvenv.cfg").is_file():
+        environment["VIRTUAL_ENV"] = str(cwd / ".venv")
     try:
         with (
             tempfile.TemporaryFile() as output,
@@ -231,7 +235,7 @@ def run_command(command: QualityCommand, cwd: Path, deadline: float) -> str | No
                 stdin=subprocess.DEVNULL,
                 stdout=output,
                 stderr=subprocess.STDOUT,
-                env={**os.environ, "NO_COLOR": "1", "UV_NO_PROGRESS": "1"},
+                env=environment,
                 start_new_session=True,
             ) as process,
         ):
@@ -273,12 +277,19 @@ def run_quality(payload: dict[str, object]) -> dict[str, object]:
 
     deadline = time.monotonic() + TIMEOUT_SECONDS
     repository = get_repository(cwd)
-    root = repository or cwd
     checked = get_check_files(repository, cwd, edits.paths)
-    edited = [path for path in checked if path in edits.paths]
+    groups = {}
+    for path in checked:
+        check_root = repository or get_repository(path.parent) or cwd
+        groups.setdefault(check_root, []).append(path)
+    commands = (
+        (check_root, command)
+        for check_root, paths in groups.items()
+        for command in batch_commands(get_commands([path for path in paths if path in edits.paths], paths, check_root))
+    )
     failures = []
-    for command in batch_commands(get_commands(edited, checked, root)):
-        failure = run_command(command, root, deadline)
+    for check_root, command in commands:
+        failure = run_command(command, check_root, deadline)
         if failure:
             failures.append(failure)
         if time.monotonic() >= deadline:
