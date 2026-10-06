@@ -1,0 +1,700 @@
+#!/usr/bin/env -S uv run --script
+#
+# /// script
+# requires-python = "==3.13.13"
+# dependencies = ["click==8.2.1", "rich==14.1.0"]
+# ///
+
+import asyncio
+import gzip
+import hashlib
+import json
+import os
+import re
+import shlex
+import shutil
+import signal
+import stat
+import subprocess
+import tarfile
+import tempfile
+import time
+import tomllib
+import uuid
+from collections import deque
+from dataclasses import dataclass
+from datetime import UTC, datetime
+from enum import StrEnum
+from pathlib import Path, PurePosixPath
+from typing import BinaryIO, TextIO, cast
+
+import click
+from rich.console import Console
+from rich.filesize import decimal
+from rich.progress import (
+    BarColumn,
+    DownloadColumn,
+    Progress,
+    SpinnerColumn,
+    TaskID,
+    TextColumn,
+    TimeRemainingColumn,
+    TransferSpeedColumn,
+)
+from rich.table import Table
+
+CHUNK_SIZE = 1024 * 1024
+console = Console()
+
+
+class BackupError(Exception):
+    pass
+
+
+class Status(StrEnum):
+    PENDING = "pending"
+    UPLOADED = "uploaded"
+    COMPLETE = "complete"
+    UPLOAD_FAILED = "upload failed"
+    VERIFY_FAILED = "verification failed"
+
+
+@dataclass(frozen=True)
+class Config:
+    destinations: dict[str, str]
+    icloud_drive: Path
+    icloud_ssh_host: str
+    icloud_remote: str
+    icloud_upload_timeout: int
+    staging_dir: Path
+    rclone_config: Path | None
+
+
+@dataclass(frozen=True)
+class SourceEntry:
+    path: Path
+    metadata: os.stat_result
+
+
+@dataclass(frozen=True)
+class Inventory:
+    source: Path
+    entries: tuple[SourceEntry, ...]
+    files: int
+    directories: int
+    symlinks: int
+    size: int
+
+    @property
+    def estimated_size(self) -> int:
+        return self.size + self.size // 1000 + max(CHUNK_SIZE, len(self.entries) * 2048)
+
+
+@dataclass(frozen=True)
+class Snapshot:
+    path: Path
+    size: int
+    sha256: str
+    created_at: str
+    inventory: Inventory
+
+
+@dataclass
+class DestinationResult:
+    name: str
+    location: str
+    status: Status = Status.PENDING
+    error: str = ""
+    elapsed: float = 0
+
+
+@dataclass(frozen=True)
+class CommandResult:
+    code: int
+    output: str
+    error: str
+
+    def require_success(self) -> str:
+        if self.code:
+            raise BackupError(self.error or f"rclone exited with status {self.code}")
+        return self.output
+
+
+def require_string(value: object, field: str) -> str:
+    if not isinstance(value, str) or not value.strip() or "\x00" in value:
+        raise BackupError(f"Configuration field {field!r} must be a nonempty string without NUL characters.")
+    return value
+
+
+def load_config(path: Path) -> Config:
+    try:
+        with path.open("rb") as handle:
+            values = tomllib.load(handle)
+    except FileNotFoundError as error:
+        raise BackupError(f"Missing config: {path}. See the backup example in the dotfiles README.") from error
+    except tomllib.TOMLDecodeError as error:
+        raise BackupError(f"Invalid TOML in {path}: {error}") from error
+    if set(values) - {"drive", "icloud", "sftp", "staging_dir", "rclone_config"}:
+        raise BackupError("Unknown configuration field. Use [drive], [icloud], and [sftp] destination sections.")
+    destinations = {}
+    for name in ("drive", "icloud", "sftp"):
+        section = values.get(name)
+        allowed = {"remote"}
+        if name == "icloud":
+            allowed |= {"drive_dir", "verify_host", "verify_remote", "upload_timeout_seconds"}
+        if not isinstance(section, dict) or set(section) - allowed:
+            raise BackupError(f"[{name}] must be a table with these supported fields: {', '.join(sorted(allowed))}.")
+        remote = require_string(section.get("remote"), f"{name}.remote")
+        if remote.startswith("-"):
+            raise BackupError(f"{name}.remote cannot start with '-'.")
+        destinations[name] = remote
+    icloud = values["icloud"]
+    host = require_string(icloud.get("verify_host"), "icloud.verify_host")
+    if host.startswith("-") or any(character.isspace() for character in host):
+        raise BackupError("icloud.verify_host must be an SSH hostname or alias, optionally prefixed with user@.")
+    remote = require_string(icloud.get("verify_remote"), "icloud.verify_remote")
+    if remote.startswith("-"):
+        raise BackupError("icloud.verify_remote cannot start with '-'.")
+    timeout = icloud.get("upload_timeout_seconds", 3600)
+    if type(timeout) is not int or timeout <= 0:
+        raise BackupError("icloud.upload_timeout_seconds must be a positive integer.")
+    return Config(
+        destinations=destinations,
+        icloud_drive=Path(
+            require_string(
+                icloud.get("drive_dir", "~/Library/Mobile Documents/com~apple~CloudDocs"), "icloud.drive_dir"
+            )
+        )
+        .expanduser()
+        .resolve(),
+        icloud_ssh_host=host,
+        icloud_remote=remote,
+        icloud_upload_timeout=timeout,
+        staging_dir=Path(require_string(values.get("staging_dir", tempfile.gettempdir()), "staging_dir"))
+        .expanduser()
+        .resolve(),
+        rclone_config=Path(require_string(values["rclone_config"], "rclone_config")).expanduser().resolve()
+        if "rclone_config" in values
+        else None,
+    )
+
+
+def validate_folder(value: str) -> str:
+    if (
+        not value.strip()
+        or value.startswith(("/", "~"))
+        or any(part in (".", "..") for part in value.split("/"))
+        or any(character in value for character in (":", "\\", "\x00", "\n", "\r"))
+    ):
+        raise BackupError(
+            "Destination must be a relative folder such as project/component, without '..' or a remote prefix."
+        )
+    return str(PurePosixPath(value))
+
+
+def join_remote(root: str, *parts: str) -> str:
+    return root.rstrip("/") + ("" if root.endswith(":") else "/") + "/".join(parts)
+
+
+def fingerprint(metadata: os.stat_result) -> tuple[int, ...]:
+    return (
+        metadata.st_dev,
+        metadata.st_ino,
+        metadata.st_mode,
+        metadata.st_size,
+        metadata.st_mtime_ns,
+        metadata.st_ctime_ns,
+    )
+
+
+def scan_source(source: Path) -> Inventory:
+    entries = []
+    counts = {"files": 0, "directories": 0, "symlinks": 0}
+    size = 0
+    pending = [source]
+    while pending:
+        path = pending.pop()
+        metadata = path.lstat()
+        entries.append(SourceEntry(path, metadata))
+        if stat.S_ISLNK(metadata.st_mode):
+            counts["symlinks"] += 1
+        elif stat.S_ISDIR(metadata.st_mode):
+            counts["directories"] += 1
+            with os.scandir(path) as children:
+                pending.extend(sorted((Path(child.path) for child in children), reverse=True))
+        elif stat.S_ISREG(metadata.st_mode):
+            with path.open("rb"):
+                pass
+            counts["files"] += 1
+            size += metadata.st_size
+        else:
+            raise BackupError(f"Unsupported source entry (socket, device, or FIFO): {path}")
+    return Inventory(source, tuple(entries), size=size, **counts)
+
+
+class ProgressReader:
+    def __init__(self, handle: BinaryIO, progress: Progress, task: TaskID) -> None:
+        self.handle = handle
+        self.progress = progress
+        self.task = task
+
+    def read(self, size: int = -1) -> bytes:
+        data = self.handle.read(size)
+        self.progress.advance(self.task, len(data))
+        return data
+
+
+def build_archive(inventory: Inventory, path: Path, progress: Progress) -> None:
+    task = progress.add_task("Creating archive", total=inventory.size)
+    with tarfile.open(path, "w:gz", compresslevel=6, dereference=False) as archive:
+        for entry in inventory.entries:
+            if fingerprint(entry.path.lstat()) != fingerprint(entry.metadata):
+                raise BackupError(f"Source changed before archiving: {entry.path}")
+            name = entry.path.relative_to(inventory.source.parent).as_posix()
+            if stat.S_ISREG(entry.metadata.st_mode):
+                descriptor = os.open(entry.path, os.O_RDONLY | os.O_NOFOLLOW)
+                with os.fdopen(descriptor, "rb") as handle:
+                    if fingerprint(os.fstat(handle.fileno())) != fingerprint(entry.metadata):
+                        raise BackupError(f"Source changed before reading: {entry.path}")
+                    info = archive.gettarinfo(arcname=name, fileobj=handle)
+                    archive.addfile(info, ProgressReader(handle, progress, task) if info.isfile() else None)
+                    if not info.isfile():
+                        progress.advance(task, entry.metadata.st_size)
+                    if fingerprint(os.fstat(handle.fileno())) != fingerprint(entry.metadata):
+                        raise BackupError(f"Source changed while reading: {entry.path}")
+            else:
+                archive.addfile(archive.gettarinfo(str(entry.path), arcname=name))
+    current = scan_source(inventory.source)
+    before = [(entry.path, fingerprint(entry.metadata)) for entry in inventory.entries]
+    after = [(entry.path, fingerprint(entry.metadata)) for entry in current.entries]
+    if before != after:
+        raise BackupError("Source changed while preparing the archive. Stop writers and run backup again.")
+    progress.update(task, completed=inventory.size, description="Archive created")
+
+
+def validate_archive(path: Path, progress: Progress) -> str:
+    task = progress.add_task("Checking archive readability", total=None)
+    with gzip.open(path, "rb") as uncompressed:
+        with tarfile.open(fileobj=uncompressed, mode="r|") as archive:
+            for member in archive:
+                if member.isfile():
+                    with cast(BinaryIO, archive.extractfile(member)) as content:
+                        while content.read(CHUNK_SIZE):
+                            pass
+        while uncompressed.read(CHUNK_SIZE):
+            pass
+    progress.update(task, total=path.stat().st_size, completed=0, description="Hashing archive (SHA-256)")
+    digest = hashlib.sha256()
+    with path.open("rb") as handle:
+        while data := handle.read(CHUNK_SIZE):
+            digest.update(data)
+            progress.advance(task, len(data))
+    progress.update(task, description="Archive readable and hashed")
+    return digest.hexdigest()
+
+
+def render_report(inventory: Inventory, config: Config, folder: str) -> None:
+    table = Table(title="Backup preview", show_header=False)
+    table.add_column("Item", style="bold")
+    table.add_column("Value", overflow="fold")
+    table.add_row("Source", str(inventory.source))
+    table.add_row(
+        "Contents", f"{inventory.files} files, {inventory.directories} directories, {inventory.symlinks} symlinks"
+    )
+    table.add_row("Logical size", decimal(inventory.size))
+    table.add_row(
+        "Archive space estimate", f"Up to approximately {decimal(inventory.estimated_size)}; compression varies"
+    )
+    table.add_row(
+        "Staging free space", f"{decimal(shutil.disk_usage(config.staging_dir).free)} at {config.staging_dir}"
+    )
+    table.add_row("iCloud local free space", decimal(shutil.disk_usage(config.icloud_drive).free))
+    for name, root in config.destinations.items():
+        table.add_row(name, join_remote(root, folder))
+    console.print(table)
+    console.print("Each run adds a full archive to all three destinations. Verification reads every archive back.")
+    console.print(
+        "Cloud copies are encrypted by the configured rclone crypt remotes. Symlinks are stored without following them."
+    )
+
+
+class Runner:
+    def __init__(self, config: Config, progress: Progress, log: TextIO) -> None:
+        self.config = config
+        self.progress = progress
+        self.log = log
+
+    async def run(
+        self, arguments: list[str], *, task: TaskID | None = None, remote: bool = False, timeout: float | None = None
+    ) -> CommandResult:
+        command = [
+            "rclone",
+            *arguments,
+            "--use-json-log",
+            "--stats",
+            "1s",
+            "--stats-log-level",
+            "INFO",
+            "--log-level",
+            "INFO",
+            "--contimeout",
+            "15s",
+            "--timeout",
+            "2m",
+            "--retries",
+            "2",
+            "--low-level-retries",
+            "3",
+        ]
+        if remote:
+            command = [
+                "ssh",
+                "-T",
+                "-o",
+                "BatchMode=yes",
+                "-o",
+                "StrictHostKeyChecking=yes",
+                "-o",
+                "ConnectTimeout=15",
+                "-o",
+                "ServerAliveInterval=30",
+                "-o",
+                "ServerAliveCountMax=3",
+                self.config.icloud_ssh_host,
+                shlex.join(command),
+            ]
+        elif self.config.rclone_config:
+            command += ["--config", str(self.config.rclone_config)]
+        self.log.write(json.dumps({"time": datetime.now(UTC).isoformat(), "command": command}) + "\n")
+        self.log.flush()
+        process = await asyncio.create_subprocess_exec(
+            *command,
+            stdin=subprocess.DEVNULL,
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.PIPE,
+            start_new_session=True,
+            limit=1024 * 1024,
+        )
+        stdout = cast(asyncio.StreamReader, process.stdout)
+        stderr = cast(asyncio.StreamReader, process.stderr)
+        errors = deque(maxlen=8)
+
+        async def read_errors() -> None:
+            while line := await stderr.readline():
+                text = line.decode("utf-8", errors="replace").rstrip()
+                self.log.write(text + "\n")
+                self.log.flush()
+                try:
+                    event = json.loads(text)
+                except json.JSONDecodeError:
+                    errors.append(text)
+                    console.print(text, markup=False)
+                    continue
+                stats = event.get("stats")
+                if stats and stats.get("lastError"):
+                    errors.append(stats["lastError"])
+                if stats and task is not None:
+                    total = self.progress.tasks[task].total
+                    completed = stats.get("bytes", 0)
+                    self.progress.update(task, completed=min(completed, total) if total is not None else completed)
+                if event.get("level") in ("error", "critical", "fatal", "warning", "notice"):
+                    errors.append(event.get("msg", text))
+
+        try:
+            async with asyncio.timeout(timeout):
+                async with asyncio.TaskGroup() as group:
+                    group.create_task(read_errors())
+                    output = group.create_task(stdout.read())
+                    code = await process.wait()
+            return CommandResult(code, output.result().decode("utf-8", errors="replace"), "\n".join(errors))
+        except BaseException:
+            if process.returncode is None:
+                try:
+                    os.killpg(process.pid, signal.SIGTERM)
+                    await asyncio.wait_for(process.wait(), timeout=5)
+                except TimeoutError:
+                    os.killpg(process.pid, signal.SIGKILL)
+                    await process.wait()
+                except ProcessLookupError:
+                    await process.wait()
+            raise
+
+
+async def wait_for_icloud(runner: Runner, location: str, size: int, task: TaskID) -> None:
+    deadline = asyncio.get_running_loop().time() + runner.config.icloud_upload_timeout
+    parent, _, filename = location.rpartition("/")
+    runner.progress.reset(task, description="icloud: waiting for cloud upload", total=None, completed=0)
+    while True:
+        remaining = deadline - asyncio.get_running_loop().time()
+        if remaining <= 0:
+            raise BackupError(
+                "Timed out waiting for iCloud upload. The local encrypted copy is not a verified cloud backup."
+            )
+        try:
+            result = await runner.run(
+                ["lsjson", parent, "--files-only", "--max-depth", "1", "--include", filename],
+                remote=True,
+                timeout=min(60, remaining),
+            )
+        except TimeoutError as error:
+            raise BackupError(
+                "iCloud status check timed out; check the homeserver's SSH connection and authentication."
+            ) from error
+        if result.code == 0:
+            try:
+                entries = json.loads(result.output)
+            except json.JSONDecodeError as error:
+                raise BackupError("Invalid iCloud file metadata returned by rclone.") from error
+            if not isinstance(entries, list):
+                raise BackupError("Expected an iCloud directory listing from rclone.")
+            if any(
+                entry.get("Name") == filename and not entry.get("IsDir") and entry.get("Size") == size
+                for entry in entries
+            ):
+                return
+        elif result.code not in (3, 4):
+            result.require_success()
+        await asyncio.sleep(min(10, max(0, deadline - asyncio.get_running_loop().time())))
+
+
+async def verify_hash(runner: Runner, location: str, expected: str, size: int, task: TaskID, *, remote: bool) -> None:
+    if remote:
+        await wait_for_icloud(runner, location, size, task)
+    runner.progress.reset(task, total=size, completed=0)
+    if remote:
+        runner.progress.update(task, description="icloud: reading back SHA-256")
+    result = await runner.run(["hashsum", "SHA256", location, "--download"], task=task, remote=remote)
+    output = result.require_success().strip().splitlines()
+    if len(output) != 1 or not re.fullmatch(r"[0-9a-fA-F]{64}\s+.+", output[0]):
+        raise BackupError("Expected exactly one SHA-256 checksum from read-back verification.")
+    if output[0].split()[0].lower() != expected:
+        raise BackupError("SHA-256 mismatch: the downloaded file does not match the local file.")
+    runner.progress.update(task, total=size, completed=size)
+
+
+def write_manifest(snapshot: Snapshot, destination: str, workspace: Path) -> Path:
+    directory = workspace / destination
+    directory.mkdir()
+    path = directory / (snapshot.path.name.removesuffix(".tar.gz") + ".manifest.json")
+    manifest = {
+        "format_version": 1,
+        "status": "verified",
+        "created_at": snapshot.created_at,
+        "verified_at": datetime.now(UTC).isoformat(),
+        "source": str(snapshot.inventory.source),
+        "files": snapshot.inventory.files,
+        "directories": snapshot.inventory.directories,
+        "symlinks": snapshot.inventory.symlinks,
+        "logical_bytes": snapshot.inventory.size,
+        "archive": snapshot.path.name,
+        "archive_bytes": snapshot.size,
+        "sha256": snapshot.sha256,
+    }
+    path.write_text(json.dumps(manifest, ensure_ascii=True, indent=2) + "\n")
+    return path
+
+
+async def back_up_destinations(
+    snapshot: Snapshot, folder: str, runner: Runner, workspace: Path
+) -> list[DestinationResult]:
+    results = [
+        DestinationResult(name, join_remote(root, folder, snapshot.path.name))
+        for name, root in runner.config.destinations.items()
+    ]
+
+    async def upload(result: DestinationResult) -> None:
+        started = time.monotonic()
+        task = runner.progress.add_task(f"{result.name}: uploading", total=snapshot.size)
+        try:
+            if (
+                result.name == "icloud"
+                and shutil.disk_usage(runner.config.icloud_drive).free < snapshot.size * 1.01 + CHUNK_SIZE
+            ):
+                raise BackupError("Insufficient space for the encrypted copy in the local iCloud Drive folder.")
+            output = await runner.run(["copyto", str(snapshot.path), result.location, "--immutable"], task=task)
+            output.require_success()
+            result.status = Status.UPLOADED
+            runner.progress.update(
+                task,
+                completed=snapshot.size,
+                description=f"{result.name}: upload staged" if result.name == "icloud" else f"{result.name}: uploaded",
+            )
+        except (BackupError, OSError) as error:
+            result.status = Status.UPLOAD_FAILED
+            result.error = str(error)
+            runner.progress.update(task, description=f"{result.name}: upload failed")
+        result.elapsed = time.monotonic() - started
+
+    async def verify(result: DestinationResult) -> None:
+        if result.status != Status.UPLOADED:
+            return
+        started = time.monotonic()
+        task = runner.progress.add_task(f"{result.name}: verifying", total=snapshot.size)
+        remote = result.name == "icloud"
+        location = join_remote(runner.config.icloud_remote, folder, snapshot.path.name) if remote else result.location
+        try:
+            await verify_hash(runner, location, snapshot.sha256, snapshot.size, task, remote=remote)
+            manifest = write_manifest(snapshot, result.name, workspace)
+            manifest_location = join_remote(runner.config.destinations[result.name], folder, manifest.name)
+            runner.progress.reset(task, description=f"{result.name}: publishing completion manifest", total=None)
+            output = await runner.run(["copyto", str(manifest), manifest_location, "--immutable"])
+            output.require_success()
+            verification_location = (
+                join_remote(runner.config.icloud_remote, folder, manifest.name) if remote else manifest_location
+            )
+            await verify_hash(
+                runner,
+                verification_location,
+                hashlib.sha256(manifest.read_bytes()).hexdigest(),
+                manifest.stat().st_size,
+                task,
+                remote=remote,
+            )
+            result.status = Status.COMPLETE
+            runner.progress.update(task, description=f"{result.name}: verified")
+        except (BackupError, OSError) as error:
+            result.status = Status.VERIFY_FAILED
+            result.error = str(error)
+            runner.progress.update(task, description=f"{result.name}: verification failed")
+        result.elapsed += time.monotonic() - started
+
+    async with asyncio.TaskGroup() as group:
+        for result in results:
+            group.create_task(upload(result))
+    async with asyncio.TaskGroup() as group:
+        for result in results:
+            group.create_task(verify(result))
+    return results
+
+
+def render_results(results: list[DestinationResult]) -> None:
+    table = Table(title="Backup results")
+    for column in ("Destination", "Upload", "Verification", "Time", "Archive"):
+        table.add_column(column, overflow="fold")
+    for result in results:
+        upload = "FAILED" if result.status == Status.UPLOAD_FAILED else "OK"
+        verification = (
+            "Verified"
+            if result.status == Status.COMPLETE
+            else "Skipped"
+            if result.status == Status.UPLOAD_FAILED
+            else "FAILED"
+        )
+        table.add_row(result.name, upload, verification, f"{result.elapsed:.1f}s", result.location)
+    console.print(table)
+    for result in results:
+        if result.error:
+            console.print(f"{result.name}: {result.error}", style="red", markup=False)
+
+
+@click.command(context_settings={"help_option_names": ["-h", "--help"]})
+@click.option("--folder", "-f", required=True, help="Named backup folder, such as project/component.")
+@click.option(
+    "--config",
+    "config_path",
+    type=click.Path(path_type=Path),
+    envvar="BACKUP_CONFIG",
+    default=lambda: Path(os.environ.get("XDG_CONFIG_HOME", str(Path.home() / ".config"))) / "backup/config.toml",
+    show_default="~/.config/backup/config.toml",
+    show_envvar=True,
+    help="Private TOML configuration with drive, icloud, and sftp sections.",
+)
+@click.option("--dry-run", is_flag=True, help="Inspect and report without creating archives or uploading.")
+@click.argument("source", type=click.Path(path_type=Path))
+def main(folder: str, config_path: Path, dry_run: bool, source: Path) -> None:
+    """Back up SOURCE to --folder on all three destinations. Put options before SOURCE.
+
+    Example: backup --folder project/component ./exports
+
+    Destinations are read from the private config's [drive], [icloud], and
+    [sftp] sections. Use --config or BACKUP_CONFIG to select another file.
+
+    Each run creates a full dated .tar.gz archive and verifies its SHA-256 by
+    downloading it. A matching .manifest.json marks successful verification.
+    Old backups are retained. Files must remain unchanged while archiving;
+    use database exports instead of live database files. Standard tar metadata
+    and symlinks are preserved; macOS ACLs and extended attributes are not.
+    iCloud verification runs through the configured homeserver SSH connection.
+    """
+    os.umask(0o077)
+    workspace = None
+    success = False
+    try:
+        folder = validate_folder(folder)
+        config = load_config(config_path.expanduser())
+        for executable in ("rclone", "ssh"):
+            if not shutil.which(executable):
+                raise BackupError(f"Required executable is not on PATH: {executable}")
+        source = source.expanduser().absolute()
+        source = source.resolve() if source.name == ".." else source.parent.resolve() / source.name
+        if not source.name:
+            raise BackupError("Choose a named file or directory, not a filesystem root.")
+        if not config.staging_dir.is_dir() or not config.icloud_drive.is_dir():
+            raise BackupError("The configured staging directory and native iCloud Drive directory must already exist.")
+        if source.is_dir() and config.staging_dir.is_relative_to(source.resolve()):
+            raise BackupError("The staging directory must be outside the source tree.")
+        with console.status("Scanning source..."):
+            inventory = scan_source(source)
+        render_report(inventory, config, folder)
+        if dry_run:
+            return
+        if shutil.disk_usage(config.staging_dir).free < inventory.estimated_size:
+            raise BackupError(
+                "Insufficient estimated staging space. Set staging_dir to a different volume in the config."
+            )
+        if not click.confirm("Continue?", default=False):
+            console.print("Cancelled. No archive was created and nothing was uploaded.")
+            return
+        workspace = Path(tempfile.mkdtemp(prefix="backup-", dir=config.staging_dir))
+        name = re.sub(r"[^\w.-]+", "-", source.name, flags=re.ASCII).strip(".-")[:80] or "backup"
+        archive = workspace / f"{name}-{datetime.now(UTC):%Y-%m-%dT%H-%M-%SZ}-{uuid.uuid4().hex[:8]}.tar.gz"
+        with (
+            (workspace / "run.log").open("w") as log,
+            Progress(
+                SpinnerColumn(),
+                TextColumn("{task.description}", markup=False),
+                BarColumn(),
+                DownloadColumn(),
+                TransferSpeedColumn(),
+                TimeRemainingColumn(),
+                console=console,
+            ) as progress,
+        ):
+            log.write(
+                json.dumps({"source": str(source), "folder": folder, "created_at": datetime.now(UTC).isoformat()})
+                + "\n"
+            )
+            build_archive(inventory, archive, progress)
+            digest = validate_archive(archive, progress)
+            snapshot = Snapshot(archive, archive.stat().st_size, digest, datetime.now(UTC).isoformat(), inventory)
+            log.write(json.dumps({"archive": archive.name, "size": snapshot.size, "sha256": digest}) + "\n")
+            console.print(f"Archive: {decimal(snapshot.size)} | SHA-256: {digest}")
+            results = asyncio.run(back_up_destinations(snapshot, folder, Runner(config, progress, log), workspace))
+            log.write(json.dumps({"results": [vars(result) for result in results]}) + "\n")
+        render_results(results)
+        success = all(result.status == Status.COMPLETE for result in results)
+        if not success:
+            raise BackupError("One or more destinations did not complete verified backups.")
+        console.print("All three backups passed read-back verification.", style="green")
+    except (BackupError, OSError, tarfile.TarError, EOFError) as error:
+        raise click.ClickException(str(error)) from error
+    finally:
+        if workspace is not None:
+            try:
+                directory = Path(os.environ.get("XDG_STATE_HOME", str(Path.home() / ".local/state"))) / "backup"
+                directory.mkdir(parents=True, exist_ok=True, mode=0o700)
+                destination = directory / f"{workspace.name}.log"
+                shutil.copyfile(workspace / "run.log", destination)
+                destination.chmod(0o600)
+                console.print(f"Log: {destination}", markup=False)
+            except OSError as error:
+                success = False
+                console.print(f"Could not save the run log: {error}", style="red", markup=False)
+            if success:
+                shutil.rmtree(workspace)
+            else:
+                console.print(f"Staging retained for recovery: {workspace}", style="yellow", markup=False)
+
+
+if __name__ == "__main__":
+    main()
