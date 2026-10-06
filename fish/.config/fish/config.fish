@@ -8,15 +8,7 @@ set -x EDITOR nvim
 # Use ~/.config for XDG apps (lazygit, etc.)
 set -gx XDG_CONFIG_HOME "$HOME/.config"
 
-# Tide prompt
-set -g tide_git_color_branch 008700
-set -g tide_git_color_stash 008700
-set -g tide_git_color_untracked 008700
-set -g tide_character_color 008700
-set -g tide_character_vi_icon_default ❯
-set -g tide_character_vi_icon_replace ❯
-set -g tide_character_vi_icon_visual ❯
-set -g tide_right_prompt_items status cmd_duration context jobs python
+set -gx VIRTUAL_ENV_DISABLE_PROMPT true
 
 # Set IPython directory
 set -x IPYTHONDIR $HOME/.config/ipython
@@ -183,3 +175,7 @@ mise activate fish | source
 
 # aws
 set -x AWS_PAGER "bat -l man -p"
+
+if status is-interactive
+  source "$__fish_config_dir/prompt.fish"
+end

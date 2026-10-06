@@ -279,7 +279,6 @@ if command -v fish &> /dev/null; then
     jorgebucaran/fisher
     jethrokuan/z
     patrickf1/fzf.fish
-    IlanCosman/tide@v6
   )
   fish -c "fisher install ${fish_plugins[*]}"
   fish -c "fish_vi_key_bindings"
