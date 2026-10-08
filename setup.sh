@@ -282,6 +282,12 @@ if command -v fish &> /dev/null; then
   )
   fish -c "fisher install ${fish_plugins[*]}"
   fish -c "fish_vi_key_bindings"
+  fish -c '
+    if type -q tailscale
+      mkdir -p "$__fish_config_dir/completions"
+      tailscale completion fish > "$__fish_config_dir/completions/tailscale.fish"
+    end
+  '
 else
   echo "Fish not found in PATH; expected fish to be installed." >&2
   exit 1

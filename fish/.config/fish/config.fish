@@ -51,6 +51,10 @@ switch (uname)
     # utm
     alias utmctl "/Applications/UTM.app/Contents/MacOS/utmctl"
 
+    if test -x /Applications/Tailscale.app/Contents/MacOS/Tailscale
+      alias tailscale /Applications/Tailscale.app/Contents/MacOS/Tailscale
+    end
+
     # orbstack
     source ~/.orbstack/shell/init2.fish 2>/dev/null || :
 
