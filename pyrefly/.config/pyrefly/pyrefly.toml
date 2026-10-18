@@ -1,0 +1,42 @@
+project-includes = ["**/*.py", "**/*.pyi"]
+project-excludes = [
+	"**/.cache/**",
+	"**/.claude/worktrees/**",
+	"**/.mypy_cache/**",
+	"**/.nox/**",
+	"**/.pytest_cache/**",
+	"**/.ruff_cache/**",
+	"**/.tox/**",
+	"**/.uv-cache/**",
+	"**/.venv/**",
+	"**/__pycache__/**",
+	"**/*.egg-info/**",
+	"**/venv/**",
+	"**/node_modules/**",
+	"**/build/**",
+	"**/coverage/**",
+	"**/dist/**",
+	"**/*.gen.py",
+	"**/*.gen.pyi",
+	"**/*.generated.py",
+	"**/*.generated.pyi"
+]
+disable-project-excludes-heuristics = true
+preset = "strict"
+infer-with-first-use = false
+treat-all-caps-as-final = true
+
+[errors]
+deprecated = "error"
+implicit-reexport = "error"
+incompatible-comparison = "error"
+non-exhaustive-match = "error"
+not-required-key-access = "error"
+redundant-cast = "error"
+redundant-condition = "error"
+unknown-argument-type = "error"
+unknown-attribute-type = "error"
+unknown-variable-type = "error"
+unnecessary-comparison = "error"
+untyped-class-decorator = "error"
+untyped-function-decorator = "error"

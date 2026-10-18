@@ -1,0 +1,181 @@
+{
+	"plugins": ["eslint", "typescript", "unicorn", "oxc", "import", "react", "jsx-a11y"],
+	"categories": {
+		"correctness": "error",
+		"suspicious": "error",
+		"pedantic": "error",
+		"perf": "error",
+		"style": "error",
+		"restriction": "off",
+		"nursery": "off"
+	},
+	"options": {
+		"typeAware": true,
+		"denyWarnings": true,
+		"reportUnusedDisableDirectives": "error"
+	},
+	"env": {
+		"builtin": true,
+		"browser": true,
+		"node": true
+	},
+	"settings": {
+		"react": {
+			"version": "19.2.8"
+		}
+	},
+	"ignorePatterns": [
+		"**/.cache/**",
+		"**/.claude/worktrees/**",
+		"**/.next/**",
+		"**/.nitro/**",
+		"**/.nuxt/**",
+		"**/.output/**",
+		"**/.tanstack/**",
+		"**/.turbo/**",
+		"**/.venv/**",
+		"**/venv/**",
+		"**/node_modules/**",
+		"**/build/**",
+		"**/coverage/**",
+		"**/dist/**",
+		"**/storybook-static/**",
+		"**/*.gen.*",
+		"**/*.generated.*"
+	],
+	"rules": {
+		"sort-imports": "off",
+		"one-var": "off",
+		"sort-keys": "off",
+		"func-style": "off",
+		"no-magic-numbers": "off",
+		"import/prefer-default-export": "off",
+		"import/no-named-export": "off",
+		"typescript/prefer-readonly-parameter-types": "off",
+		"react/react-in-jsx-scope": "off",
+		"react/rules-of-hooks": "error",
+		"react/exhaustive-deps": "error",
+		"react/only-export-components": [
+			"warn",
+			{
+				"allowExportNames": ["createFileRoute", "createRootRoute", "createRootRouteWithContext"]
+			}
+		],
+		"typescript/consistent-type-imports": [
+			"error",
+			{
+				"prefer": "type-imports",
+				"fixStyle": "inline-type-imports",
+				"disallowTypeAnnotations": false
+			}
+		],
+		"typescript/no-import-type-side-effects": "error",
+		"typescript/switch-exhaustiveness-check": "error",
+		"typescript/restrict-template-expressions": [
+			"error",
+			{
+				"allowNumber": true
+			}
+		],
+		"typescript/no-confusing-void-expression": [
+			"error",
+			{
+				"ignoreArrowShorthand": true
+			}
+		],
+		"typescript/prefer-nullish-coalescing": [
+			"error",
+			{
+				"ignorePrimitives": {
+					"string": true,
+					"boolean": true
+				},
+				"ignoreMixedLogicalExpressions": true
+			}
+		],
+		"typescript/only-throw-error": "off",
+		"no-unused-vars": [
+			"error",
+			{
+				"argsIgnorePattern": "^_"
+			}
+		],
+		"typescript/no-misused-promises": [
+			"error",
+			{
+				"checksVoidReturn": {
+					"arguments": false,
+					"attributes": false,
+					"properties": false
+				}
+			}
+		],
+		"typescript/no-unnecessary-condition": "error",
+		"typescript/no-floating-promises": "error",
+		"typescript/no-unsafe-type-assertion": "error",
+		"unicorn/no-array-for-each": "error",
+		"unicorn/prefer-array-some": "error",
+		"unicorn/prefer-array-find": "error",
+		"unicorn/prefer-array-flat": "error",
+		"unicorn/prefer-array-flat-map": "error",
+		"unicorn/prefer-string-starts-ends-with": "error",
+		"unicorn/prefer-string-replace-all": "error",
+		"unicorn/prefer-includes": "error",
+		"unicorn/prefer-node-protocol": "error",
+		"unicorn/prefer-set-has": "error",
+		"unicorn/prefer-ternary": "error",
+		"unicorn/prefer-single-call": "error",
+		"unicorn/no-lonely-if": "error",
+		"unicorn/throw-new-error": "error",
+		"unicorn/error-message": "error",
+		"unicorn/new-for-builtins": "error",
+		"unicorn/no-instanceof-builtins": "error",
+		"unicorn/no-useless-undefined": [
+			"error",
+			{
+				"checkArrowFunctionBody": false,
+				"checkArguments": false
+			}
+		],
+		"unicorn/no-zero-fractions": "error",
+		"unicorn/escape-case": "error",
+		"import/no-unassigned-import": "off",
+		"import/no-cycle": [
+			"error",
+			{
+				"maxDepth": 3
+			}
+		],
+		"import/no-self-import": "error",
+		"import/no-duplicates": "error",
+		"import/first": "error",
+		"import/newline-after-import": "error"
+	},
+	"overrides": [
+		{
+			"files": ["**/.config/**/*.ts", "**/vite.config.ts"],
+			"rules": {
+				"import/no-nodejs-modules": "off"
+			}
+		},
+		{
+			"files": ["**/services/webapp/**/*.tsx", "**/services/webapp/**/*.jsx"],
+			"rules": {
+				"sort-imports": "off",
+				"one-var": "off",
+				"sort-keys": "off",
+				"func-style": "off",
+				"no-magic-numbers": "off",
+				"import/prefer-default-export": "off",
+				"import/no-named-export": "off",
+				"typescript/prefer-readonly-parameter-types": "off",
+				"jsx-a11y/anchor-is-valid": [
+					"error",
+					{
+						"specialLink": ["to", "href"]
+					}
+				]
+			}
+		}
+	]
+}

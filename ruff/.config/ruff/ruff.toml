@@ -23,6 +23,7 @@ select = [
   "SIM117",  # combine nested context managers
   "RET504",  # unnecessary assignment before return
 ]
+extend-select = ["UP006", "UP035"]
 ignore = [
   "D1", # ignore all missing-docstring rules so checks only apply to existing docstrings
 ]
@@ -34,5 +35,16 @@ convention = "google"
 [lint.isort]
 split-on-trailing-comma = false
 
+[lint.flake8-tidy-imports.banned-api]
+"argparse".msg = "Use `click` instead of `argparse`."
+
 [lint.flake8-bugbear]
 extend-immutable-calls = ["fastapi.Depends", "fastapi.Header", "fastapi.Form", "fastapi.Query"]
+
+[lint.per-file-ignores]
+"**/migrations/versions/*" = ["D", "E501"]
+"**/tests/conftest.py" = ["E402"]
+"**/tests/**/test_*.py" = ["S101"]
+
+[format]
+skip-magic-trailing-comma = true

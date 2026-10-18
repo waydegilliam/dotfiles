@@ -1,0 +1,61 @@
+{
+	"printWidth": 120,
+	"proseWrap": "always",
+	"tabWidth": 4,
+	"useTabs": true,
+	"trailingComma": "none",
+	"singleQuote": false,
+	"semi": false,
+	"sortPackageJson": false,
+	"sortImports": {
+		"groups": [
+			["side_effect_style", "style"],
+			["builtin", "external"],
+			"argos",
+			"internal",
+			["parent", "sibling", "index"],
+			"unknown"
+		],
+		"customGroups": [
+			{
+				"groupName": "argos",
+				"elementNamePattern": ["@argos/**"]
+			}
+		],
+		"internalPattern": ["@/"],
+		"newlinesBetween": true
+	},
+	"sortTailwindcss": {
+		"functions": ["cn", "cva"]
+	},
+	"ignorePatterns": [
+		"**/.cache/**",
+		"**/.claude/worktrees/**",
+		"**/.next/**",
+		"**/.nitro/**",
+		"**/.nuxt/**",
+		"**/.output/**",
+		"**/.tanstack/**",
+		"**/.turbo/**",
+		"**/.venv/**",
+		"**/venv/**",
+		"**/node_modules/**",
+		"**/build/**",
+		"**/coverage/**",
+		"**/dist/**",
+		"**/storybook-static/**",
+		"**/*.gen.*",
+		"**/*.generated.*",
+		"**/public/**",
+		"**/package-lock.json",
+		"**/npm-shrinkwrap.json",
+		"**/pnpm-lock.yaml",
+		"**/yarn.lock",
+		"**/bun.lock",
+		"**/bun.lockb",
+		"**/uv.lock",
+		"**/poetry.lock",
+		"**/Pipfile.lock",
+		"**/pdm.lock"
+	]
+}
