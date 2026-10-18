@@ -200,5 +200,10 @@
 	"azureTerraform.survey": {
 		"surveyPromptDate": "never",
 		"surveyPromptIgnoredCount": 0
-	}
+	},
+	"python.languageServer": "Default",
+	"githubPullRequests.deleteBranchAfterMerge": true,
+	"githubPullRequests.showPullRequestNumberInTree": true,
+	"githubPullRequests.webviewRefreshInterval": 15,
+	"githubPullRequests.createOnPublishBranch": "never"
 }
