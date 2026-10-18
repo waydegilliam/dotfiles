@@ -1,6 +1,7 @@
 #!/usr/bin/env -S uv run --script
 # /// script
-# requires-python = ">=3.11"
+# requires-python = "==3.15.0"
+# dependencies = ["pydantic==2.14.1"]
 # ///
 
 import json
@@ -13,9 +14,11 @@ import tempfile
 import time
 import tomllib
 from collections.abc import Iterator
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from functools import cache
 from pathlib import Path
+
+from pydantic import BaseModel, ConfigDict, Field, ValidationError
 
 TIMEOUT_SECONDS = 270
 OUTPUT_LIMIT = 12000
@@ -35,20 +38,49 @@ FORMAT_EXTENSIONS = JAVASCRIPT_EXTENSIONS | set(
     """.split()
 )
 FORMAT_NAMES = {".babelrc", ".swcrc", ".prettierrc", ".eslintrc"}
-OXLINT = ["npx", "--yes", "--package=oxlint", "--package=oxlint-tsgolint", "oxlint", "--no-error-on-unmatched-pattern"]
-OXFMT = ["npx", "--yes", "oxfmt", "--no-error-on-unmatched-pattern"]
-
-
-@dataclass
-class SessionEdits:
-    paths: set[Path] = field(default_factory=set)
-    changed_this_turn: bool = False
+CONFIG_HOME = Path(os.environ.get("XDG_CONFIG_HOME") or Path.home() / ".config")
+TOOLS = {
+    "oxlint": "npx --yes --package=oxlint --package=oxlint-tsgolint oxlint --format stylish",
+    "oxfmt": "npx --yes oxfmt",
+    "pyrefly": "uvx pyrefly check --min-severity warn --summary=none",
+}
 
 
 @dataclass
 class QualityCommand:
     args: list[str]
     paths: list[Path]
+
+
+class InputModel(BaseModel):
+    model_config = ConfigDict(strict=True, extra="ignore")
+
+
+class HookInput(InputModel):
+    cwd: Path | None = None
+    transcript_path: Path | None = None
+    turn_id: str | None = None
+    stop_hook_active: bool = False
+    permission_mode: str | None = None
+
+
+class FileChange(InputModel):
+    move_path: Path | None = None
+
+
+class TranscriptEvent(InputModel):
+    type: str | None = None
+    cwd: Path | None = None
+    turn_id: str | None = None
+    status: str | None = None
+    success: bool = False
+    item: "TranscriptEvent | None" = None
+    changes: dict[str, FileChange] = Field(default_factory=dict)
+
+
+class TranscriptRecord(InputModel):
+    type: str | None = None
+    payload: TranscriptEvent
 
 
 def is_in_scope(path: Path, root: Path) -> bool:
@@ -59,51 +91,42 @@ def is_in_scope(path: Path, root: Path) -> bool:
     )
 
 
-def read_session_edits(transcript: Path, cwd: Path, turn_id: str) -> SessionEdits:
-    edits = SessionEdits()
+def read_session_edits(transcript: Path, cwd: Path, turn_id: str) -> set[Path]:
+    paths: set[Path] = set()
+    changed = False
     active_turn = None
     active_cwd = cwd
     with transcript.open() as stream:
         for line in stream:
             try:
-                record = json.loads(line)
-            except json.JSONDecodeError:
+                record = TranscriptRecord.model_validate_json(line)
+            except ValidationError:
                 continue
-            if not isinstance(record, dict) or not isinstance(record.get("payload"), dict):
-                continue
-            payload = record["payload"]
-            if record.get("type") in {"session_meta", "turn_context"}:
-                if isinstance(payload.get("cwd"), str):
-                    active_cwd = Path(payload["cwd"])
-                if isinstance(payload.get("turn_id"), str):
-                    active_turn = payload["turn_id"]
-            if payload.get("type") == "task_started":
-                active_turn = payload.get("turn_id")
+            payload = record.payload
+            if record.type in ("session_meta", "turn_context"):
+                if payload.cwd is not None:
+                    active_cwd = payload.cwd
+                if payload.turn_id is not None:
+                    active_turn = payload.turn_id
+            if payload.type == "task_started":
+                active_turn = payload.turn_id
 
-            if payload.get("type") == "item_completed":
-                item = payload.get("item")
-                if not isinstance(item, dict) or item.get("type") != "FileChange" or item.get("status") != "completed":
+            match payload:
+                case TranscriptEvent(
+                    type="item_completed", item=TranscriptEvent(type="FileChange", status="completed") as item
+                ):
+                    pass
+                case TranscriptEvent(type="patch_apply_end", success=True) as item:
+                    pass
+                case _:
                     continue
-            elif payload.get("type") == "patch_apply_end" and payload.get("success") is True:
-                item = payload
-            else:
-                continue
-
-            changes = item.get("changes")
-            if not isinstance(changes, dict):
-                continue
-            for name, change in changes.items():
-                if not isinstance(name, str) or not isinstance(change, dict):
-                    continue
-                destination = change.get("move_path")
-                if isinstance(destination, str):
-                    name = destination
-                path = Path(os.path.abspath(active_cwd / name))
+            for name, change in item.changes.items():
+                path = Path(os.path.abspath(active_cwd / (change.move_path or name)))
                 if is_in_scope(path, cwd):
-                    edits.paths.add(path)
-                    if payload.get("turn_id", active_turn) == turn_id:
-                        edits.changed_this_turn = True
-    return edits
+                    paths.add(path)
+                    event_turn = payload.turn_id if "turn_id" in payload.model_fields_set else active_turn
+                    changed |= event_turn == turn_id
+    return paths if changed else set()
 
 
 def run_git(cwd: Path, *args: str, input_text: str | None = None) -> subprocess.CompletedProcess[str]:
@@ -121,118 +144,108 @@ def get_repository(cwd: Path) -> Path | None:
     return Path(result.stdout.strip()).resolve() if result.returncode == 0 else None
 
 
-def select_files(paths: set[Path], root: Path) -> list[Path]:
-    return sorted(
+def get_check_files(repository: Path | None, cwd: Path, edited: set[Path]) -> list[Path]:
+    paths = edited
+    if repository:
+        result = run_git(repository, "ls-files", "-z", "--cached", "--others", "--exclude-standard")
+        if result.returncode:
+            raise RuntimeError(result.stderr.strip())
+        paths = {repository / name for name in result.stdout.split("\0") if name}
+    paths = {
         path
         for path in paths
-        if is_in_scope(path, root)
+        if is_in_scope(path, repository or cwd)
         and path.is_file()
         and path.resolve() == path
         and (path.suffix.lower() in PYTHON_EXTENSIONS | FORMAT_EXTENSIONS or path.name in FORMAT_NAMES)
-    )
-
-
-def get_check_files(repository: Path | None, cwd: Path, edited: set[Path]) -> list[Path]:
-    if repository is None:
-        return select_files(edited, cwd)
-    result = run_git(repository, "ls-files", "-z", "--cached", "--others", "--exclude-standard")
-    if result.returncode:
-        raise RuntimeError(result.stderr.strip())
-    paths = select_files({repository / name for name in result.stdout.split("\0") if name}, repository)
-    if not paths:
-        return []
-    ignored = run_git(
-        repository, "check-ignore", "--no-index", "-z", "--stdin", input_text="".join(f"{path}\0" for path in paths)
-    )
-    if ignored.returncode not in {0, 1}:
-        raise RuntimeError(ignored.stderr.strip())
-    excluded = set(ignored.stdout.split("\0"))
-    return [path for path in paths if str(path) not in excluded]
+    }
+    if repository and paths:
+        ignored = run_git(
+            repository, "check-ignore", "--no-index", "-z", "--stdin", input_text="".join(f"{path}\0" for path in paths)
+        )
+        if ignored.returncode not in {0, 1}:
+            raise RuntimeError(ignored.stderr.strip())
+        paths -= {Path(name) for name in ignored.stdout.split("\0") if name}
+    return sorted(paths)
 
 
 @cache
-def find_pyrefly_config(directory: Path) -> Path | None:
+def find_config(directory: Path, root: Path, tool: str) -> Path:
+    if tool == "pyrefly":
+        if override := os.environ.get("PYREFLY_CONFIG"):
+            return (root / override).resolve()
+        names = ["pyrefly.toml", "pyproject.toml"]
+    else:
+        names = [f".{tool}rc.json", f".{tool}rc.jsonc", f".config/{tool}/config.json", f".config/{tool}/config.jsonc"]
+        names.extend(f"{tool}.config.{extension}" for extension in ("ts", "mts", "cts", "js", "mjs", "cjs"))
     for parent in (directory, *directory.parents):
-        config = parent / "pyrefly.toml"
-        if config.is_file():
-            return config
-        config = parent / "pyproject.toml"
-        if config.is_file() and "pyrefly" in tomllib.loads(config.read_text()).get("tool", {}):
-            return config
-    return None
+        for name in names:
+            config = parent / name
+            if config.is_file() and (
+                name != "pyproject.toml" or "pyrefly" in tomllib.loads(config.read_text()).get("tool", {})
+            ):
+                return config
+        if tool != "pyrefly" and parent == root:
+            break
+    return CONFIG_HOME / tool / ("pyrefly.toml" if tool == "pyrefly" else "config.json")
 
 
-def get_pyrefly_commands(paths: list[Path], cwd: Path) -> Iterator[QualityCommand]:
-    groups = {}
-    override = os.environ.get("PYREFLY_CONFIG")
-    for path in paths:
-        config = (cwd / override).resolve() if override else find_pyrefly_config(path.parent)
-        groups.setdefault(config, []).append(path)
-    for config, files in groups.items():
-        args = ["uvx", "pyrefly", "check", "--output-format", "min-text"]
-        if config is not None:
-            settings = tomllib.loads(config.read_text())
-            if config.name == "pyproject.toml":
-                settings = settings["tool"]["pyrefly"]
-            args.extend(["--config", str(config)])
-            for pattern in settings.get("project-excludes", []):
-                args.extend(["--project-excludes", str(config.parent / pattern)])
-        yield QualityCommand(args, files)
-
-
-def get_commands(edited: list[Path], checked: list[Path], cwd: Path) -> list[QualityCommand]:
-    python_edited = [path for path in edited if path.suffix.lower() in PYTHON_EXTENSIONS]
-    javascript_edited = [path for path in edited if path.suffix.lower() in JAVASCRIPT_EXTENSIONS]
-    format_edited = [path for path in edited if path.suffix.lower() in FORMAT_EXTENSIONS or path.name in FORMAT_NAMES]
-    python_checked = [path for path in checked if path.suffix.lower() in PYTHON_EXTENSIONS]
-    javascript_checked = [path for path in checked if path.suffix.lower() in JAVASCRIPT_EXTENSIONS]
-    format_checked = [path for path in checked if path.suffix.lower() in FORMAT_EXTENSIONS or path.name in FORMAT_NAMES]
-    return [
-        QualityCommand(["uvx", "ruff", "check", "--fix", "--force-exclude"], python_edited),
-        QualityCommand([*OXLINT, "--fix"], javascript_edited),
-        QualityCommand(["uvx", "ruff", "format", "--force-exclude"], python_edited),
-        QualityCommand([*OXFMT, "--write"], format_edited),
-        QualityCommand(["uvx", "ruff", "check", "--force-exclude"], python_checked),
-        QualityCommand(["uvx", "ruff", "format", "--check", "--force-exclude"], python_checked),
-        QualityCommand(["uvx", "ty", "check", "--force-exclude", "--output-format", "concise"], python_checked),
-        *get_pyrefly_commands(python_checked, cwd),
-        QualityCommand([*OXLINT, "--type-aware", "--type-check"], javascript_checked),
-        QualityCommand([*OXFMT, "--check"], format_checked),
-    ]
-
-
-def batch_commands(commands: list[QualityCommand]) -> Iterator[QualityCommand]:
-    for command in commands:
-        paths = []
-        size = 0
-        for path in command.paths:
-            length = len(os.fsencode(path)) + 1
-            if size + length > 60000 and paths:
-                yield QualityCommand(command.args, paths)
-                paths = []
-                size = 0
-            paths.append(path)
-            size += length
-        if paths:
-            yield QualityCommand(command.args, paths)
+def get_commands(paths: list[Path], cwd: Path, fix: bool) -> Iterator[QualityCommand]:
+    python = [path for path in paths if path.suffix.lower() in PYTHON_EXTENSIONS]
+    yield QualityCommand(["uvx", "ruff", "format", "--quiet", "--force-exclude", *([] if fix else ["--check"])], python)
+    yield QualityCommand(["uvx", "ruff", "check", "--quiet", "--force-exclude", *(["--fix"] if fix else [])], python)
+    for tool, extensions in {
+        "oxlint": JAVASCRIPT_EXTENSIONS,
+        "oxfmt": FORMAT_EXTENSIONS,
+        "pyrefly": PYTHON_EXTENSIONS,
+    }.items():
+        if tool == "pyrefly" and fix:
+            continue
+        groups: dict[Path, list[Path]] = {}
+        for path in paths:
+            if path.suffix.lower() in extensions or (tool == "oxfmt" and path.name in FORMAT_NAMES):
+                groups.setdefault(find_config(path.parent, cwd, tool), []).append(path)
+        for config, files in groups.items():
+            args = [*shlex.split(TOOLS[tool]), "--config", str(config)]
+            global_config = config.parent == CONFIG_HOME / tool
+            if tool == "pyrefly":
+                settings = tomllib.loads(config.read_text())
+                if config.name == "pyproject.toml":
+                    settings = settings["tool"]["pyrefly"]
+                if global_config:
+                    args.extend(["--search-path", str(cwd)])
+                for pattern in settings.get("project-excludes", []):
+                    args.extend(["--project-excludes", str((cwd if global_config else config.parent) / pattern)])
+            else:
+                args.append("--no-error-on-unmatched-pattern")
+                if tool == "oxlint":
+                    args.append("--fix" if fix else "--deny-warnings")
+                else:
+                    args.append("--write" if fix else "--list-different")
+                if global_config:
+                    patterns: list[str] = json.loads(config.read_text()).get("ignorePatterns", [])
+                    for pattern in patterns:
+                        args.extend([f"!{pattern}"] if tool == "oxfmt" else ["--ignore-pattern", pattern])
+            yield QualityCommand(args, files)
 
 
 def run_command(command: QualityCommand, cwd: Path, deadline: float) -> str | None:
+    if not command.paths:
+        return None
     remaining = deadline - time.monotonic()
     if remaining <= 0:
         return "Quality hook execution deadline exceeded."
-    args = [*command.args, "--", *(str(path) for path in command.paths)]
     label = f"$ {shlex.join(command.args)}"
-    environment = {**os.environ, "NO_COLOR": "1", "UV_NO_PROGRESS": "1"}
+    environment = dict(os.environ, NO_COLOR="1", FORCE_COLOR="0", LC_ALL="C", UV_NO_PROGRESS="1", PYREFLY_LOG="warn")
     if (cwd / ".venv/pyvenv.cfg").is_file():
         environment["VIRTUAL_ENV"] = str(cwd / ".venv")
     try:
         with (
             tempfile.TemporaryFile() as output,
             subprocess.Popen(
-                args,
+                ["xargs", "-0", "-s", "60000", "--", *command.args, "--"],
                 cwd=cwd,
-                stdin=subprocess.DEVNULL,
+                stdin=subprocess.PIPE,
                 stdout=output,
                 stderr=subprocess.STDOUT,
                 env=environment,
@@ -240,7 +253,7 @@ def run_command(command: QualityCommand, cwd: Path, deadline: float) -> str | No
             ) as process,
         ):
             try:
-                process.wait(timeout=remaining)
+                process.communicate(b"".join(os.fsencode(path) + b"\0" for path in command.paths), timeout=remaining)
                 timed_out = False
             except subprocess.TimeoutExpired:
                 os.killpg(process.pid, signal.SIGKILL)
@@ -259,35 +272,32 @@ def run_command(command: QualityCommand, cwd: Path, deadline: float) -> str | No
         return f"{label}\n{error}"
 
 
-def run_quality(payload: dict[str, object]) -> dict[str, object]:
-    if payload.get("stop_hook_active") is True or payload.get("permission_mode") == "plan":
+def run_quality(payload: HookInput) -> dict[str, object]:
+    if payload.stop_hook_active or payload.permission_mode == "plan":
         return {"continue": True}
-    cwd_value = payload.get("cwd")
-    transcript_value = payload.get("transcript_path")
-    turn_id = payload.get("turn_id")
-    if not isinstance(cwd_value, str) or not isinstance(transcript_value, str) or not isinstance(turn_id, str):
+    if payload.cwd is None or payload.transcript_path is None or payload.turn_id is None:
         return {"continue": True, "systemMessage": "Quality checks skipped: missing Codex session context."}
-    cwd = Path(cwd_value).resolve()
+    cwd = payload.cwd.resolve()
     try:
-        edits = read_session_edits(Path(transcript_value), cwd, turn_id)
+        edits = read_session_edits(payload.transcript_path, cwd, payload.turn_id)
     except (OSError, UnicodeError) as error:
         return {"continue": True, "systemMessage": f"Quality checks skipped: cannot read Codex transcript: {error}"}
-    if not edits.changed_this_turn:
+    if not edits:
         return {"continue": True}
 
     deadline = time.monotonic() + TIMEOUT_SECONDS
     repository = get_repository(cwd)
-    checked = get_check_files(repository, cwd, edits.paths)
-    groups = {}
-    for path in checked:
+    groups: dict[Path, list[Path]] = {}
+    for path in get_check_files(repository, cwd, edits):
         check_root = repository or get_repository(path.parent) or cwd
         groups.setdefault(check_root, []).append(path)
     commands = (
         (check_root, command)
         for check_root, paths in groups.items()
-        for command in batch_commands(get_commands([path for path in paths if path in edits.paths], paths, check_root))
+        for fix in (True, False)
+        for command in get_commands([path for path in paths if not fix or path in edits], check_root, fix)
     )
-    failures = []
+    failures: list[str] = []
     for check_root, command in commands:
         failure = run_command(command, check_root, deadline)
         if failure:
@@ -309,10 +319,8 @@ def run_quality(payload: dict[str, object]) -> dict[str, object]:
 
 def main() -> None:
     try:
-        payload = json.load(sys.stdin)
-        if not isinstance(payload, dict):
-            raise ValueError("expected a JSON object")
-    except (ValueError, UnicodeError) as error:
+        payload = HookInput.model_validate_json(sys.stdin.read())
+    except (ValidationError, UnicodeError) as error:
         response = {"continue": True, "systemMessage": f"Quality checks skipped: invalid hook input: {error}"}
     else:
         try:
