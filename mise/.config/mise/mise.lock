@@ -525,6 +525,10 @@ url = "https://nodejs.org/dist/v24.3.0/node-v24.3.0-darwin-arm64.tar.gz"
 version = "0.159.0"
 backend = "npm:@openai/codex"
 
+[[tools."npm:cf"]]
+version = "1.0.0-beta.18"
+backend = "npm:cf"
+
 [[tools.pnpm]]
 version = "12.8.1"
 backend = "aqua:pnpm/pnpm"
