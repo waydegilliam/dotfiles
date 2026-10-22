@@ -1,0 +1,24 @@
+rex.bind("cmd+s", "client.sidebar.toggle")
+
+rex.bind("ctrl+h", "pane.focus", { direction = "left", wrap = false })
+rex.bind("ctrl+j", "pane.focus", { direction = "down", wrap = false })
+rex.bind("ctrl+k", "pane.focus", { direction = "up", wrap = false })
+rex.bind("ctrl+l", "pane.focus", { direction = "right", wrap = false })
+
+rex.bind("ctrl+space>h", "pane.focus", { direction = "left", wrap = false })
+rex.bind("ctrl+space>j", "pane.focus", { direction = "down", wrap = false })
+rex.bind("ctrl+space>k", "pane.focus", { direction = "up", wrap = false })
+rex.bind("ctrl+space>l", "pane.focus", { direction = "right", wrap = false })
+
+rex.bind("ctrl+space>c", "client.tab.new")
+rex.bind("ctrl+space>shift+c", "session.new")
+rex.bind("ctrl+space>r", "client.tab.rename")
+rex.bind("ctrl+space>shift+r", "session.rename")
+rex.bind("ctrl+space>n", "client.tab.next")
+rex.bind("ctrl+space>p", "client.tab.previous")
+
+rex.bind("ctrl+space>v", "pane.split", { direction = "right" })
+rex.bind("ctrl+space>b", "pane.split", { direction = "down" })
+rex.bind("ctrl+space>m", "pane.zoom")
+rex.bind("ctrl+space>=", "pane.balance")
+rex.bind("ctrl+space>ctrl+space", "pane.send_key", { key = "ctrl+space" })

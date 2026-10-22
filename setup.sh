@@ -19,8 +19,10 @@ for arg in "$@"; do
 done
 
 DOTFILES_SERVER=(
+  agents
   bash
   bat
+  claude
   codex
   eza
   fish
@@ -32,8 +34,12 @@ DOTFILES_SERVER=(
   mise
   npm
   nvim
+  oxfmt
+  oxlint
   pnpm
   prettier
+  pyrefly
+  rex
   ruff
   scripts
   stylua
@@ -64,6 +70,15 @@ BREW_PACKAGES=(
 
 BREW_TAPS=(
   docker/tap
+)
+
+BREW_TRUSTED_FORMULAE=(
+  aws/tap/copilot-cli
+  aws/tap/lightsailctl
+  hashicorp/tap/packer
+  modem-dev/tap/hunk
+  porter-dev/porter/porter
+  stripe/stripe-cli/stripe
 )
 
 BREW_CASKS=(
@@ -126,7 +141,7 @@ install_git_repo() {
     git -C "$install_dir" checkout --detach "$commit"
 }
 
-stow_dotfiles() {
+stow_dotfiles() (
   local pkg
   local stow_args=(--verbose)
   local failed_packages=()
@@ -135,6 +150,8 @@ stow_dotfiles() {
     echo "GNU Stow is required to link dotfiles." >&2
     return 1
   fi
+
+  cd "$SCRIPT_DIR" || return 1
 
   if [[ "${STOW_ADOPT:-0}" == "1" ]]; then
     stow_args+=(--adopt)
@@ -160,7 +177,7 @@ stow_dotfiles() {
     echo "Resolve the conflicts above, then rerun $0 --stow-only." >&2
     return 1
   fi
-}
+)
 
 DOTFILES=("${DOTFILES_SERVER[@]}")
 if is_desktop; then
@@ -186,12 +203,16 @@ if is_macos; then
   for tap in "${BREW_TAPS[@]}"; do
     brew trust "$tap"
   done
+  brew trust --formula "${BREW_TRUSTED_FORMULAE[@]}"
 
   # Install packages
   brew install --quiet "${BREW_PACKAGES[@]}"
 
   # Install casks
   brew install --quiet --cask "${BREW_CASKS[@]}"
+
+  # Set Rex preferences
+  defaults write com.superlogical.rex Workspace.tabStyle -string vertical
 fi
 
 if is_linux; then

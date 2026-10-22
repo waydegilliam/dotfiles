@@ -3,6 +3,9 @@
 venv
 .venv/
 __pycache__/
+.ruff_cache/
+.pytest_cache/
+.mypy_cache/
 
 # GitHub CLI login credentials
 gh/.config/gh/hosts.yml
