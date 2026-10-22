@@ -14,6 +14,8 @@ rex.bind("ctrl+space>c", "client.tab.new")
 rex.bind("ctrl+space>shift+c", "session.new")
 rex.bind("ctrl+space>r", "client.tab.rename")
 rex.bind("ctrl+space>shift+r", "session.rename")
+rex.bind("ctrl+space>x", "pane.close")
+rex.bind("ctrl+space>shift+x", "client.tab.close")
 rex.bind("ctrl+space>n", "client.tab.next")
 rex.bind("ctrl+space>p", "client.tab.previous")
 
