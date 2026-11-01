@@ -288,6 +288,13 @@ stow_dotfiles || exit 1
 export MISE_CONFIG_FILE="$SCRIPT_DIR/mise/.config/mise/config.toml"
 MISE_JOBS=1 "$MISE_BIN" install
 
+# Install gh CLI extensions, reinstalling gh-stack when it isn't the pinned version
+GH_STACK_VERSION="v0.2.1"
+if ! "$MISE_BIN" exec -- gh extension list | grep -q "github/gh-stack[[:space:]]*$GH_STACK_VERSION"; then
+  "$MISE_BIN" exec -- gh extension remove gh-stack 2> /dev/null
+  "$MISE_BIN" exec -- gh extension install github/gh-stack --pin "$GH_STACK_VERSION"
+fi
+
 # Disable go telemetry
 if "$MISE_BIN" exec -- which go &> /dev/null; then
   "$MISE_BIN" exec -- go telemetry off
