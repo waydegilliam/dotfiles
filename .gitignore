@@ -29,3 +29,9 @@ fish/.config/fish/conf.d/*
 !fish/.config/fish/conf.d/01-tmux-window.fish
 
 ghostty/.config/ghostty/*.bak
+
+claude/.claude/*
+!claude/.claude/skills
+!claude/.claude/settings.json
+
+codex/.codex/config.toml
