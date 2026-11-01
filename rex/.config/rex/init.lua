@@ -1,3 +1,5 @@
+require("window-history")
+
 rex.bind("cmd+s", "client.sidebar.toggle")
 
 rex.bind("ctrl+h", "pane.focus", { direction = "left", wrap = false })
@@ -18,6 +20,8 @@ rex.bind("ctrl+space>x", "pane.close")
 rex.bind("ctrl+space>shift+x", "client.tab.close")
 rex.bind("ctrl+space>n", "client.tab.next")
 rex.bind("ctrl+space>p", "client.tab.previous")
+rex.bind("ctrl+space>shift+n", "window_history_forward")
+rex.bind("ctrl+space>shift+p", "window_history_back")
 
 rex.bind("ctrl+space>v", "pane.split", { direction = "right" })
 rex.bind("ctrl+space>b", "pane.split", { direction = "down" })
