@@ -1,0 +1,20 @@
+# Personal Rex server, so sessions run as this user. setup.sh points the
+# host's Tailscale Serve at serve.sock, which makes the server reachable at this
+# machine's tailnet name, e.g. `rex -S ubuntu-desktop.tail333062.ts.net ls`.
+
+[Unit]
+Description=Rex Server
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=notify
+NotifyAccess=main
+# Go refuses to start when the host sets a removed GODEBUG value
+Environment=GODEBUG=
+ExecStart=/usr/bin/rex server run --log-format text --extra-listen tailnet-serve://%t/rex/serve.sock
+Restart=on-failure
+RestartSec=5s
+
+[Install]
+WantedBy=default.target

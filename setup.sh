@@ -53,6 +53,10 @@ DOTFILES_DESKTOP=(
   vimium
 )
 
+DOTFILES_LINUX=(
+  systemd
+)
+
 BREW_PACKAGES=(
   docker
   docker/tap/sbx
@@ -86,6 +90,7 @@ BREW_CASKS=(
   monitorcontrol
   ngrok
   rectangle
+  tailscale-app
 )
 
 APT_PACKAGES=(
@@ -184,6 +189,10 @@ if is_desktop; then
   DOTFILES+=("${DOTFILES_DESKTOP[@]}")
 fi
 
+if is_linux; then
+  DOTFILES+=("${DOTFILES_LINUX[@]}")
+fi
+
 if [[ "$STOW_ONLY" == "1" ]]; then
   stow_dotfiles
   exit $?
@@ -244,6 +253,16 @@ if is_linux; then
   else
     echo "Skipping Docker install (no docker packages in apt sources)"
   fi
+
+  # Install Tailscale (adds the Tailscale apt repo)
+  if ! command -v tailscale &> /dev/null; then
+    curl -fsSL https://tailscale.com/install.sh | sh
+  fi
+
+  # Install Rex server (adds the Rex apt repo, so apt upgrades it afterwards)
+  if [[ ! -f /etc/apt/sources.list.d/rex.sources ]]; then
+    curl -fsSL https://pkgs.superlogical.com/rex/install.sh | sh
+  fi
 fi
 
 # Install tmux plugins
@@ -283,6 +302,20 @@ fi
 
 # Stow dotfiles before installing tools that depend on their configuration.
 stow_dotfiles || exit 1
+
+# Serve Rex over Tailscale at this machine's tailnet name
+if is_linux; then
+  # Sign in to the tailnet (prints a login URL and waits on first run)
+  tailscale status &> /dev/null || sudo tailscale up
+
+  # Run the user's Rex server at boot, without a login session
+  sudo loginctl enable-linger "$USER"
+  systemctl --user daemon-reload
+  systemctl --user enable --now rex.service
+
+  # Rex clients try ports 443 and 7297, so the bare tailnet name finds it
+  sudo tailscale serve --bg --https=7297 "unix:/run/user/$(id -u)/rex/serve.sock"
+fi
 
 # Install Mise tools
 export MISE_CONFIG_FILE="$SCRIPT_DIR/mise/.config/mise/config.toml"
