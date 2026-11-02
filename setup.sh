@@ -102,6 +102,7 @@ APT_PACKAGES=(
   make
   postgresql
   postgresql-contrib
+  speedtest-cli
   stow
   tmux
   tree
