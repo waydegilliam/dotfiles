@@ -205,5 +205,9 @@
 	"githubPullRequests.deleteBranchAfterMerge": true,
 	"githubPullRequests.showPullRequestNumberInTree": true,
 	"githubPullRequests.webviewRefreshInterval": 15,
-	"githubPullRequests.createOnPublishBranch": "never"
+	"githubPullRequests.createOnPublishBranch": "never",
+	"remote.SSH.useLocalServer": false,
+	"remote.SSH.remotePlatform": {
+		"ubuntu-desktop": "linux"
+	}
 }
