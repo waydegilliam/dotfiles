@@ -73,6 +73,7 @@ BREW_PACKAGES=(
 )
 
 BREW_TAPS=(
+  anomalyco/tap
   docker/tap
 )
 
@@ -87,6 +88,7 @@ BREW_TRUSTED_FORMULAE=(
 
 BREW_CASKS=(
   alt-tab
+  anomalyco/tap/hex
   monitorcontrol
   ngrok
   rectangle
