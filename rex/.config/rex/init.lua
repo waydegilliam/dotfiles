@@ -28,3 +28,5 @@ rex.bind("ctrl+space>b", "pane.split", { direction = "down" })
 rex.bind("ctrl+space>m", "pane.zoom")
 rex.bind("ctrl+space>=", "pane.balance")
 rex.bind("ctrl+space>ctrl+space", "pane.send_key", { key = "ctrl+space" })
+
+rex.bind("ctrl+space>[", "pane.copy_mode.enter")
