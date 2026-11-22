@@ -50,6 +50,7 @@ DOTFILES_DESKTOP=(
   code
   cursor
   ghostty
+  hex
   vimium
 )
 
@@ -82,7 +83,6 @@ BREW_TRUSTED_FORMULAE=(
   aws/tap/lightsailctl
   hashicorp/tap/packer
   modem-dev/tap/hunk
-  porter-dev/porter/porter
   stripe/stripe-cli/stripe
 )
 
@@ -90,7 +90,6 @@ BREW_CASKS=(
   alt-tab
   anomalyco/tap/hex
   monitorcontrol
-  ngrok
   rectangle
   tailscale-app
 )

@@ -113,12 +113,6 @@ alias gc "git commit"
 alias gci "git commit -m '.'"
 alias gsl "git stash list"
 
-alias gtc "gt checkout"
-alias gts "gt sync"
-alias gtl "gt log"
-alias gtls "gt log short"
-alias gtsp "gt submit --publish"
-
 alias t tmux
 alias ts "tmux ls"
 alias tk "tmux kill-session -t"
@@ -147,7 +141,6 @@ alias cat bat
 alias c clear
 alias logout exit
 alias watch-gpu "watch -n0.1 nvidia-smi"
-alias ld lazydocker
 alias lg lazygit
 alias tf terraform
 
