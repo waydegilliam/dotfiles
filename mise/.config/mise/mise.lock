@@ -524,55 +524,6 @@ url = "https://github.com/cli/cli/releases/download/v2.83.1/gh_2.83.1_macOS_amd6
 url_api = "https://api.github.com/repos/cli/cli/releases/assets/316039204"
 provenance = "github-attestations"
 
-[[tools.ghq]]
-version = "1.8.0"
-backend = "aqua:x-motemen/ghq"
-
-[tools.ghq."platforms.linux-arm64"]
-checksum = "sha1:e5a73c5f4785d798a66b10419ab7b43b8525a7e4"
-url = "https://github.com/x-motemen/ghq/releases/download/v1.8.0/ghq_linux_arm64.zip"
-url_api = "https://api.github.com/repos/x-motemen/ghq/releases/assets/240669911"
-
-[tools.ghq."platforms.linux-arm64-musl"]
-checksum = "sha1:e5a73c5f4785d798a66b10419ab7b43b8525a7e4"
-url = "https://github.com/x-motemen/ghq/releases/download/v1.8.0/ghq_linux_arm64.zip"
-url_api = "https://api.github.com/repos/x-motemen/ghq/releases/assets/240669911"
-
-[tools.ghq."platforms.linux-x64"]
-checksum = "sha1:f38219ddbc6ef6febd75556902eee4759bad07c3"
-url = "https://github.com/x-motemen/ghq/releases/download/v1.8.0/ghq_linux_amd64.zip"
-url_api = "https://api.github.com/repos/x-motemen/ghq/releases/assets/240669912"
-
-[tools.ghq."platforms.linux-x64-baseline"]
-checksum = "sha1:f38219ddbc6ef6febd75556902eee4759bad07c3"
-url = "https://github.com/x-motemen/ghq/releases/download/v1.8.0/ghq_linux_amd64.zip"
-url_api = "https://api.github.com/repos/x-motemen/ghq/releases/assets/240669912"
-
-[tools.ghq."platforms.linux-x64-musl"]
-checksum = "sha1:f38219ddbc6ef6febd75556902eee4759bad07c3"
-url = "https://github.com/x-motemen/ghq/releases/download/v1.8.0/ghq_linux_amd64.zip"
-url_api = "https://api.github.com/repos/x-motemen/ghq/releases/assets/240669912"
-
-[tools.ghq."platforms.linux-x64-musl-baseline"]
-checksum = "sha1:f38219ddbc6ef6febd75556902eee4759bad07c3"
-url = "https://github.com/x-motemen/ghq/releases/download/v1.8.0/ghq_linux_amd64.zip"
-url_api = "https://api.github.com/repos/x-motemen/ghq/releases/assets/240669912"
-
-[tools.ghq."platforms.macos-arm64"]
-checksum = "sha1:6fd6333348fdaf78dfbbe36cec168f3e656a63c8"
-url = "https://github.com/x-motemen/ghq/releases/download/v1.8.0/ghq_darwin_arm64.zip"
-url_api = "https://api.github.com/repos/x-motemen/ghq/releases/assets/240669901"
-
-[tools.ghq."platforms.macos-x64"]
-checksum = "sha1:f50a794201bac18df1ac8d00e863e9635576aa94"
-url = "https://github.com/x-motemen/ghq/releases/download/v1.8.0/ghq_darwin_amd64.zip"
-url_api = "https://api.github.com/repos/x-motemen/ghq/releases/assets/240669899"
-
-[tools.ghq."platforms.macos-x64-baseline"]
-checksum = "sha1:f50a794201bac18df1ac8d00e863e9635576aa94"
-url = "https://github.com/x-motemen/ghq/releases/download/v1.8.0/ghq_darwin_amd64.zip"
-url_api = "https://api.github.com/repos/x-motemen/ghq/releases/assets/240669899"
-
 [[tools.glow]]
 version = "2.1.2"
 backend = "aqua:charmbracelet/glow"
