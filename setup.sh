@@ -150,7 +150,7 @@ install_git_repo() {
 
 stow_dotfiles() (
   local pkg
-  local stow_args=(--verbose)
+  local stow_args=(--verbose --no-folding)
   local failed_packages=()
 
   if ! command -v stow &> /dev/null; then

@@ -256,6 +256,7 @@ url = "https://github.com/dandavison/delta/releases/download/0.18.2/delta-0.18.2
 url_api = "https://api.github.com/repos/dandavison/delta/releases/assets/191958486"
 
 [tools.delta."platforms.linux-x64-baseline"]
+checksum = "sha256:99607c43238e11a77fe90a914d8c2d64961aff84b60b8186c1b5691b39955b0f"
 url = "https://github.com/dandavison/delta/releases/download/0.18.2/delta-0.18.2-x86_64-unknown-linux-gnu.tar.gz"
 url_api = "https://api.github.com/repos/dandavison/delta/releases/assets/191958486"
 
@@ -265,6 +266,7 @@ url = "https://github.com/dandavison/delta/releases/download/0.18.2/delta-0.18.2
 url_api = "https://api.github.com/repos/dandavison/delta/releases/assets/191958583"
 
 [tools.delta."platforms.linux-x64-musl-baseline"]
+checksum = "sha256:b7ea845004762358a00ef9127dd9fd723e333c7e4b9cb1da220c3909372310ee"
 url = "https://github.com/dandavison/delta/releases/download/0.18.2/delta-0.18.2-x86_64-unknown-linux-musl.tar.gz"
 url_api = "https://api.github.com/repos/dandavison/delta/releases/assets/191958583"
 
@@ -279,6 +281,7 @@ url = "https://github.com/dandavison/delta/releases/download/0.18.2/delta-0.18.2
 url_api = "https://api.github.com/repos/dandavison/delta/releases/assets/191958449"
 
 [tools.delta."platforms.macos-x64-baseline"]
+checksum = "sha256:e9b5c4a9e73d2119c687e074f0d97f188e30e5fe8ae0e6d455755f74bb5cc0cf"
 url = "https://github.com/dandavison/delta/releases/download/0.18.2/delta-0.18.2-x86_64-apple-darwin.tar.gz"
 url_api = "https://api.github.com/repos/dandavison/delta/releases/assets/191958449"
 
@@ -299,6 +302,7 @@ checksum = "sha256:0c38665440226cd8bef5d1d4f3bc6ff77c927fb0d68b752739105db7ab5b3
 url = "https://github.com/eza-community/eza/releases/download/v0.23.4/eza_x86_64-unknown-linux-gnu.tar.gz"
 
 [tools.eza."platforms.linux-x64-baseline"]
+checksum = "sha256:0c38665440226cd8bef5d1d4f3bc6ff77c927fb0d68b752739105db7ab5b358d"
 url = "https://github.com/eza-community/eza/releases/download/v0.23.4/eza_x86_64-unknown-linux-gnu.tar.gz"
 
 [tools.eza."platforms.linux-x64-musl"]
@@ -306,6 +310,7 @@ checksum = "sha256:0c38665440226cd8bef5d1d4f3bc6ff77c927fb0d68b752739105db7ab5b3
 url = "https://github.com/eza-community/eza/releases/download/v0.23.4/eza_x86_64-unknown-linux-gnu.tar.gz"
 
 [tools.eza."platforms.linux-x64-musl-baseline"]
+checksum = "sha256:0c38665440226cd8bef5d1d4f3bc6ff77c927fb0d68b752739105db7ab5b358d"
 url = "https://github.com/eza-community/eza/releases/download/v0.23.4/eza_x86_64-unknown-linux-gnu.tar.gz"
 
 [tools.eza."platforms.macos-arm64"]
@@ -317,6 +322,7 @@ checksum = "sha256:cfd895c5667b380c9d6b277902a281608507a0079f9d7ec8a2e914e8c9d76
 url = "https://github.com/cargo-bins/cargo-quickinstall/releases/download/eza-0.23.4/eza-0.23.4-x86_64-apple-darwin.tar.gz"
 
 [tools.eza."platforms.macos-x64-baseline"]
+checksum = "sha256:cfd895c5667b380c9d6b277902a281608507a0079f9d7ec8a2e914e8c9d76dd1"
 url = "https://github.com/cargo-bins/cargo-quickinstall/releases/download/eza-0.23.4/eza-0.23.4-x86_64-apple-darwin.tar.gz"
 
 [[tools.fd]]

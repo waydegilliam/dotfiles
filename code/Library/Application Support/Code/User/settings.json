@@ -187,8 +187,6 @@
 	},
 	"chat.viewSessions.orientation": "stacked",
 	"githubPullRequests.hideViewedFiles": false,
-	"gitlens.ai.model": "gitkraken",
-	"gitlens.ai.gitkraken.model": "gemini:gemini-2.0-flash",
 	"git.ignoreRebaseWarning": true,
 	"git.detectWorktrees": true,
 	"chat.disableAIFeatures": true,
