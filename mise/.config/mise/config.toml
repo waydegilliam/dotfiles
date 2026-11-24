@@ -29,6 +29,8 @@ uv = "0.13.5"
 yarn = "4.12.0"
 "npm:cf" = "1.0.0-beta.18"
 pi = "1.5.0"
+"pipx:huggingface_hub" = "2.4.0"
+python = "3.14.10"
 
 [settings]
 experimental = true
