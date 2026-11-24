@@ -95,6 +95,7 @@ set textwidth=120
 set formatoptions+=t
 set background=light
 set laststatus=3
+set winborder=rounded
 set sessionoptions+=tabpages,globals
 set shell=/bin/bash\ -i
 

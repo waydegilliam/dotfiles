@@ -21,17 +21,6 @@ vim.diagnostic.config({
 	},
 })
 
--- Hover doc & signature handlers
-
-local border = { "╭", "─", "╮", "│", "╯", "─", "╰", "│" }
-local handlers = {
-	["textDocument/hover"] = vim.lsp.with(vim.lsp.handlers.hover, { border = border }),
-	["textDocument/signatureHelp"] = vim.lsp.with(
-		vim.lsp.handlers.signature_help,
-		{ border = border }
-	),
-}
-
 -- Capabilities
 
 -- Used for UFO
@@ -48,7 +37,6 @@ capabilities.textDocument.completion.completionItem.snippetSupport = true
 
 vim.lsp.config("*", {
 	capabilities = capabilities,
-	handlers = handlers,
 })
 
 local function enable(server, opts)
