@@ -9,14 +9,14 @@ endif
 call plug#begin()
 
 " Core
-Plug 'nvim-lua/plenary.nvim'
+Plug 'nvim-lua/plenary.nvim', {'commit': '74b06c6c75e4eeb3108ec01852001636d85a932b'}
 
 " Filetree
 Plug 'nvim-tree/nvim-tree.lua', {'commit': 'a2aaf8b430c11af36b869cf1c0ad2f7c8ceeaf2c'} 
 Plug 'nvim-tree/nvim-web-devicons', {'commit': '47103b80c38c59f7a1b5408c232b92bf5d018651'}
 
 " LSP
-Plug 'neovim/nvim-lspconfig'
+Plug 'neovim/nvim-lspconfig', {'commit': '7d22e678970d95d8d18494ec389c52b07111c53a'}
 
 " Treesitter
 Plug 'nvim-treesitter/nvim-treesitter', {'commit': '8996612bfbebe1657e1bb55a95201c96cab945c6', 'do': 'TSUpdate'}
@@ -28,28 +28,29 @@ Plug 'JoosepAlviste/nvim-ts-context-commentstring', {'commit': '92e688f013c69f90
 Plug 'maxmellon/vim-jsx-pretty', {'commit': '6989f1663cc03d7da72b5ef1c03f87e6ddb70b41'}
 
 " Misc
-Plug 'phaazon/hop.nvim'
-Plug 'lewis6991/gitsigns.nvim'
-Plug 'windwp/nvim-autopairs'
-Plug 'jpalardy/vim-slime'
+Plug 'lewis6991/gitsigns.nvim', {'commit': 'c0862d382a35b7b45757d8d151a6a634c09bf3ce'}
+Plug 'windwp/nvim-autopairs', {'commit': '3172f40c16563db871a58f20d205c710ad782311'}
+Plug 'jpalardy/vim-slime', {'commit': '375999b91aa9bd227350140d4aedc6d2ff8554ac'}
 " Plug 'kevinhwang91/nvim-ufo', {'commit': 'a346e88c776a7089291c883705c5cd8a6ce67558'}
 " Plug 'kevinhwang91/promise-async', {'commit': '70b09063cdf029079b25c7925e4494e7416ee995'}
 Plug 'dhruvasagar/vim-zoom', {'commit': '9f281ac7766c3931cb87698602eeb33a62660ae2'}
 Plug 'christoomey/vim-tmux-navigator', {'commit': 'afb45a55b452b9238159047ce7c6e161bd4a9907'}
-Plug 'rmagatti/auto-session' 
+Plug 'rmagatti/auto-session', {'commit': '02a5588f677970a9bc784115c62bef9e5855499b'}
 
-Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
-Plug 'junegunn/fzf.vim'
+Plug 'junegunn/fzf', {'commit': '9a0705815cc690552ac5e2c0a6b51fd4ed3e831a', 'do': { -> fzf#install() }}
+Plug 'junegunn/fzf.vim', {'commit': 'fe5f1fd45418c1a4d905f44a59357008058cc789'}
 
 Plug 'numToStr/Comment.nvim', {'commit': '5f01c1a89adafc52bf34e3bf690f80d9d726715d'}
-Plug 'ruanyl/vim-gh-line'
-Plug 'ojroques/vim-oscyank', {'branch': 'main'}
+Plug 'ruanyl/vim-gh-line', {'commit': '731751fdfa4f64a061dbc7088cb7b2f12e828ad'}
 
-Plug 'vim-scripts/AutoComplPop'
-Plug 'easymotion/vim-easymotion'
-Plug 'projekt0n/github-nvim-theme', {'commit': 'c106c9472154d6b2c74b74565616b877ae8ed31d'}
+Plug 'vim-scripts/AutoComplPop', {'commit': '0b075cf5e6ef05584ef6377e116e8d0fe1f8f788'}
 
 call plug#end()
+
+" Local plugins
+packadd jump
+packadd osc52
+packadd github-light
 
 " Load configs
 lua require("config.autocmd")
@@ -60,7 +61,6 @@ lua require("config.plugins.lsp-config")
 lua require("config.plugins.nvim-tree")
 lua require("config.plugins.gitsigns")
 " lua require("config.plugins.cmp")
-lua require("config.plugins.hop")
 lua require("config.plugins.treesitter")
 lua require("config.plugins.autopairs")
 lua require("config.plugins.comment")
@@ -99,7 +99,7 @@ set sessionoptions+=tabpages,globals
 set shell=/bin/bash\ -i
 
 " Colorscheme
-colorscheme github_light_default
+colorscheme github-light
 
 " Python venv
 let g:python3_host_prog = stdpath('config') . '/venv/bin/python'
@@ -145,11 +145,13 @@ nnoremap <leader>e <cmd>NvimTreeToggle<cr>
 " Gitsigns
 nnoremap <leader>gh <cmd>Gitsigns preview_hunk<cr>
 
-" " Hop
-nnoremap f <cmd>HopWord<cr>
-nnoremap F <cmd>HopLine<cr>
-vnoremap f <cmd>HopWord<cr>
-vnoremap F <cmd>HopLine<cr>
+" Jump
+nnoremap f <cmd>JumpWord<cr>
+nnoremap F <cmd>JumpLine<cr>
+vnoremap f <cmd>JumpWord<cr>
+vnoremap F <cmd>JumpLine<cr>
+onoremap f <cmd>JumpWord<cr>
+onoremap F <cmd>JumpLine<cr>
 
 " FZF
 nnoremap <leader>ff <cmd>Files<cr>

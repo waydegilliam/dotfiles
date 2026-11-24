@@ -1,0 +1,23 @@
+{
+	"$schema": "https://raw.githubusercontent.com/LuaLS/vscode-lua/master/setting/schema.json",
+	"runtime.version": "LuaJIT",
+	"runtime.path": ["lua/?.lua", "lua/?/init.lua", "?.lua"],
+	"workspace.checkThirdParty": false,
+	"workspace.library": ["$VIMRUNTIME/lua", "$PLUGIN_LUA_DIR"],
+	"type.castNumberToInteger": true,
+	"type.weakNilCheck": false,
+	"type.weakUnionCheck": false,
+	"diagnostics.globals": ["vim"],
+	"diagnostics.severity": {
+		"assign-type-mismatch": "Error",
+		"cast-local-type": "Error",
+		"missing-fields": "Error",
+		"missing-parameter": "Error",
+		"missing-return": "Error",
+		"need-check-nil": "Error",
+		"param-type-mismatch": "Error",
+		"return-type-mismatch": "Error",
+		"undefined-field": "Error",
+		"unused-local": "Warning"
+	}
+}
