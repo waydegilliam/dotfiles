@@ -153,12 +153,18 @@ end
 
 
 # ===== Keybinds ==============================================================
+# Vi mode (must be set before the insert-mode binds below)
+set -g fish_key_bindings fish_vi_key_bindings
+
 # Search through command history
 bind -M insert \cp history-search-backward
 bind -M insert \cn history-search-forward
 
 # Exit insert mode 
-bind -M insert -m default jk force-repaint
+bind -M insert -m default jk backward-char repaint-mode
+
+# Yank visual selection to the system clipboard (like nvim's clipboard=unnamedplus)
+bind -M visual -m default y "fish_clipboard_copy; commandline -f end-selection repaint-mode"
 
 # ===== Tool setup ============================================================
 # venv
